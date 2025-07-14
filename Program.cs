@@ -6,9 +6,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ActivityContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING")));
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ActivityContext>();
+    dbContext.Database.Migrate(); // Applies any pending migrations
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
