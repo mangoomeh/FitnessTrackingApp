@@ -1,5 +1,7 @@
 @model SportsTrackingApp.Models.FitnessActivity
-
+@{
+  ViewData["Title"] = "Create";
+}
 <form asp-action="Create" method="post">
     <div class="mb-3">
         <label asp-for="Type" class="form-label"></label>
