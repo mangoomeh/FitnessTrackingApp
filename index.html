@@ -37,6 +37,7 @@
   --gym:#E5414E; --home:#35B06A; --run:#4C8CEB; --swim:#F0C23A; --on-plate:#FFFFFF; --on-swim:#1D1A10;
   --warn-bg:#3A3015; --warn-ink:#F4D98A; --ok:#35B06A; color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{background:var(--bg)}
 body{color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
@@ -95,16 +96,31 @@ header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:1
 .swim .btn.primary{color:var(--on-swim)}
 .btn.danger{color:var(--gym);border-color:var(--gym)}
 .btn.block{width:100%}
-.btn.sm{padding:6px 10px;min-width:36px}
+.btn.sm{padding:8px 10px;min-width:40px;min-height:40px}
+details>summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px}
+details>summary::-webkit-details-marker{display:none}
+details>summary::after{content:"";width:9px;height:9px;flex:none;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:0 4px 4px 0;transition:transform .15s}
+details[open]>summary::after{transform:rotate(225deg);margin:4px 4px 0 0}
+details.panel[open]>summary{margin-bottom:2px}
+.rlist{display:flex;flex-direction:column}
+.rlist details{border-top:1px solid var(--line);padding:9px 0}
+.rlist details:first-child{border-top:0;padding-top:0}
+.rlist summary span{font-weight:400}
+.rlist details>div{padding-top:4px}
+.tag{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--c);margin-left:6px;white-space:nowrap}
 .btn:disabled{opacity:.35}
 .ed .btn.primary{background:var(--ink);color:var(--bg)}
 .logs select{padding:8px;width:100%;font-size:16px}
 .logs .full{grid-column:1/-1}
 .logs textarea{font-size:16px}
 .seg{gap:6px}
-.edrow{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px}
+.edrow{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 10px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px}
 .edrow.cur{box-shadow:inset 4px 0 0 var(--c)}
 .edrow>span{min-width:0}
+.edrow>span:first-child{flex:1 1 150px}
+.edrow>.row{margin-left:auto;flex-wrap:nowrap;gap:6px}
+.ed{display:flex;flex-direction:column;gap:12px}
+.ed>header{margin-bottom:-4px}
 label.btn{cursor:pointer;display:inline-block}
 
 .ex{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
@@ -119,18 +135,18 @@ label.btn{cursor:pointer;display:inline-block}
 .lastline b{font-weight:600}
 .plates{font-size:12.5px;color:var(--muted)}
 .sets{display:flex;flex-direction:column;gap:6px}
-.set{display:grid;grid-template-columns:28px minmax(0,1.3fr) minmax(0,1fr) 44px;gap:8px;align-items:center}
-.set.nw{grid-template-columns:28px minmax(0,1fr) 44px}
+.set{display:grid;grid-template-columns:20px minmax(0,1.5fr) minmax(0,1fr) 44px;gap:6px;align-items:center}
+.set.nw{grid-template-columns:20px minmax(0,1fr) 44px}
+.sethead{font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:-2px}
 .set .n{font-family:var(--f-display);font-weight:700;font-size:18px;color:var(--muted);text-align:center}
 .field{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0}
-.field input{border:0;background:transparent;width:100%;min-width:0;text-align:center;padding:8px 2px;font-variant-numeric:tabular-nums;font-size:16px;font-weight:600}
-.field .u{font-size:12px;color:var(--muted);padding-right:8px}
-.field .pm{border:0;background:transparent;width:30px;height:38px;font-size:18px;color:var(--muted);flex:none}
-.tick{width:44px;height:40px;border-radius:8px;border:2px solid var(--line);background:transparent;font-size:18px;color:var(--muted)}
+.field input{border:0;background:transparent;width:100%;min-width:0;text-align:center;padding:10px 0;font-variant-numeric:tabular-nums;font-size:16px;font-weight:600}
+.field .pm{border:0;background:transparent;width:34px;height:42px;font-size:18px;color:var(--muted);flex:none}
+.tick{width:44px;height:44px;border-radius:8px;border:2px solid var(--line);background:transparent;font-size:18px;color:var(--muted)}
 .set.done .tick{background:var(--c);border-color:var(--c);color:var(--on-plate)}
 .set.done .field{border-color:color-mix(in srgb,var(--c) 55%,var(--line))}
 .links{display:flex;gap:14px;flex-wrap:wrap}
-.link{background:none;border:0;padding:0;color:var(--muted);font-size:13px;text-decoration:underline;text-underline-offset:3px}
+.link{background:none;border:0;padding:8px 0;color:var(--muted);font-size:13px;text-decoration:underline;text-underline-offset:3px}
 .lvl{display:flex;align-items:center;gap:8px}
 .lvl button{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
 .lvl button:disabled{opacity:.35}
@@ -150,6 +166,7 @@ label.btn{cursor:pointer;display:inline-block}
 .logs input{padding:8px;width:100%;font-size:16px;font-variant-numeric:tabular-nums}
 
 /* timer */
+body.has-timer{padding-bottom:calc(170px + env(safe-area-inset-bottom,0px))}
 .timer{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:20;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 8px}
 .timer .in{max-width:560px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:12px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
@@ -168,6 +185,9 @@ nav.tabs button.on{color:var(--ink);background:var(--sunk)}
 
 /* sheet */
 .scrim{position:fixed;inset:0;background:rgba(10,14,18,.45);z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.xbtn{position:sticky;top:0;align-self:flex-end;margin-bottom:-46px;width:40px;height:40px;flex:none;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:16px;z-index:1}
+.sheet h2{padding-right:48px}
+.sheet input[type=search]{padding:10px 12px;font-size:16px;width:100%}
 .sheet{background:var(--surface);width:100%;max-width:560px;max-height:82%;overflow:auto;border-radius:16px 16px 0 0;
   padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:12px}
 .opt{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px}
@@ -182,6 +202,7 @@ nav.tabs button.on{color:var(--ink);background:var(--sunk)}
 .chart text{fill:var(--muted);font-size:11px;font-family:var(--f-body)}
 .empty{text-align:center;padding:28px 16px;color:var(--muted);border:1px dashed var(--line);border-radius:var(--r)}
 table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t td.num{white-space:nowrap}
 table.t td,table.t th{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 table.t th{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 table.t tr.cur td{font-weight:600}
@@ -189,6 +210,9 @@ table.t tr.cur td:first-child{box-shadow:inset 3px 0 0 var(--c)}
 .tw{overflow-x:auto}
 .toast{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:40;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;max-width:calc(100% - 32px)}
 @media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
+/* narrow phones: these must come after the base rules */
+@media (max-width:360px){.ex,.panel{padding:12px}}
+@media (max-width:340px){.field .pm{width:26px}.set{gap:5px}}
 </style>
 
 </head>
@@ -478,14 +502,14 @@ function renderToday(){
 }
 
 function renderActive(){const s=S.active;const isStr=s.mode==='gym'||s.mode==='home';
-  const doneSets=isStr?s.items.reduce((a,it)=>a+it.sets.filter(x=>x.done).length,0):0;
+  const doneSets=isStr?s.items.reduce((a,it)=>a+it.sets.filter(x=>x.done).length,0):0,allSets=isStr?s.items.reduce((a,it)=>a+it.sets.length,0):0;
   let h=`<div class="${s.mode}"><div class="sess-head"><span class="chip">${{gym:'Gym weights',home:'Home · no equipment',run:'Treadmill run',swim:'Swim · 50 m pool'}[s.mode]}</span>
     <h1>${esc(s.title)}</h1>
-    <div class="row"><button class="btn" data-act="switch">Switch workout</button></div>
+    <div class="row"><button class="btn" data-act="switch">Switch workout</button><button class="btn" data-act="tofinish">Finish ↓</button>${isStr?`<span class="small muted num">${doneSets} of ${allSets} sets done</span>`:''}</div>
     ${isStr?'<p class="small muted">Skip anything you like: only exercises with ticked sets are saved and counted.</p>':''}</div></div>`;
   if(isStr)h+=s.items.map((it,i)=>it.home?homeCard(it,i):gymCard(it,i)).join('');
   else if(s.mode==='run')h+=runCard(s);else h+=swimCard(s);
-  h+=`<div class="panel ${s.mode}"><label class="eyebrow" for="notes">Notes</label><textarea id="notes" data-f="notes" placeholder="How did it feel? Anything to remember next time?">${esc(s.notes)}</textarea>
+  h+=`<div class="panel ${s.mode}" id="finishPanel"><label class="eyebrow" for="notes">Notes</label><textarea id="notes" data-f="notes" placeholder="How did it feel? Anything to remember next time?">${esc(s.notes)}</textarea>
    <button class="btn primary block" data-act="finish">Finish and save${isStr?` · ${doneSets} sets done`:''}</button></div>`;
   return h}
 
@@ -500,12 +524,13 @@ function gymCard(it,i){const e=gx(it.ex)||{alts:[],cue:'',inc:0};const timed=it.
    ${it.first&&!timed&&!ro?`<p class="cue">${isAs(it.k)?'First time: the assistance is a starting guess. Pick an amount that leaves 2–3 reps in reserve, and adjust it here.':'First time: the weight is a starting guess. Pick a load you could lift 2–3 more reps with, and adjust it here.'}</p>`:''}
    ${last?`<div class="lastline">${last}</div>`:''}
    ${e.cue?`<p class="cue">${esc(e.cue)}</p>`:''}
-   <div class="sets">${it.sets.map((x,j)=>`<div class="set ${timed||ro?'nw':''} ${x.done?'done':''}"><span class="n">${j+1}</span>
-     ${timed||ro?'':`<div class="field"><button class="pm" data-act="w" data-i="${i}" data-j="${j}" data-d="-1" aria-label="${isAs(it.k)?'Less assistance (harder)':'Less weight'}">−</button><input id="w${i}_${j}" inputmode="decimal" data-f="w" data-i="${i}" data-j="${j}" value="${fw(x.w)}" aria-label="${isAs(it.k)?'Assistance':'Weight'} set ${j+1}"><span class="u">${unit}</span><button class="pm" data-act="w" data-i="${i}" data-j="${j}" data-d="1" aria-label="${isAs(it.k)?'More assistance (easier)':'More weight'}">+</button></div>`}
-     <div class="field"><input id="r${i}_${j}" inputmode="numeric" data-f="r" data-i="${i}" data-j="${j}" value="${esc(x.r)}" aria-label="${timed?'Seconds':'Reps'} set ${j+1}"><span class="u">${timed?'sec':'reps'}</span></div>
+   <div class="sets"><div class="set sethead ${timed||ro?'nw':''}" aria-hidden="true"><span></span>${timed||ro?'':`<span>${unit}</span>`}<span>${timed?'seconds':'reps'}</span><span></span></div>
+   ${it.sets.map((x,j)=>`<div class="set ${timed||ro?'nw':''} ${x.done?'done':''}"><span class="n">${j+1}</span>
+     ${timed||ro?'':`<div class="field"><button class="pm" data-act="w" data-i="${i}" data-j="${j}" data-d="-1" aria-label="${isAs(it.k)?'Less assistance (harder)':'Less weight'}">−</button><input id="w${i}_${j}" inputmode="decimal" data-f="w" data-i="${i}" data-j="${j}" value="${fw(x.w)}" aria-label="${isAs(it.k)?'Assistance':'Weight'} set ${j+1}, ${unit}"><button class="pm" data-act="w" data-i="${i}" data-j="${j}" data-d="1" aria-label="${isAs(it.k)?'More assistance (easier)':'More weight'}">+</button></div>`}
+     <div class="field"><input id="r${i}_${j}" inputmode="numeric" data-f="r" data-i="${i}" data-j="${j}" value="${esc(x.r)}" aria-label="${timed?'Seconds':'Reps'} set ${j+1}"></div>
      <button class="tick" data-act="tick" data-i="${i}" data-j="${j}" aria-label="Mark set ${j+1} done">✓</button></div>`).join('')}</div>
    ${pl?`<div class="plates num">${pl}</div>`:''}
-   <div class="links"><button class="link" data-act="addset" data-i="${i}">Add set</button>${it.sets.length>1?`<button class="link" data-act="delset" data-i="${i}">Remove last set</button>`:''}</div></section>`}
+   <div class="row"><button class="btn sm" data-act="addset" data-i="${i}">+ Add set</button>${it.sets.length>1?`<button class="btn sm" data-act="delset" data-i="${i}">Remove last set</button>`:''}</div></section>`}
 
 function homeCard(it,i){const h=hx(it.ex)||{lv:[[it.name||it.ex,'']]};it.level=Math.min(it.level,h.lv.length-1);const[nm,cue]=h.lv[it.level];const L=S.lifts['h_'+it.ex];const sec=it.u==='sec';
   return`<section class="ex home"><div class="ex-top"><div><div class="ex-name">${esc(nm)}</div>
@@ -516,10 +541,11 @@ function homeCard(it,i){const h=hx(it.ex)||{lv:[[it.name||it.ex,'']]};it.level=M
    ${it.up?`<div><span class="badge">Level up: you hit ${it.hi} on every set last time</span></div>`:''}
    ${L?.last&&L.level===it.level?`<div class="lastline">Last time (${nice(L.date)}): <b class="num">${L.last.map(x=>x.r+(sec?' s':'')).join(', ')}</b></div>`:''}
    ${cue?`<p class="cue">${esc(cue)}</p>`:''}
-   <div class="sets">${it.sets.map((x,j)=>`<div class="set nw ${x.done?'done':''}"><span class="n">${j+1}</span>
-     <div class="field"><button class="pm" data-act="r" data-i="${i}" data-j="${j}" data-d="-1" aria-label="Fewer">−</button><input id="r${i}_${j}" inputmode="numeric" data-f="r" data-i="${i}" data-j="${j}" value="${esc(x.r)}" aria-label="${sec?'Seconds':'Reps'} set ${j+1}"><span class="u">${sec?'sec':'reps'}</span><button class="pm" data-act="r" data-i="${i}" data-j="${j}" data-d="1" aria-label="More">+</button></div>
+   <div class="sets"><div class="set nw sethead" aria-hidden="true"><span></span><span>${sec?'seconds':'reps'}</span><span></span></div>
+   ${it.sets.map((x,j)=>`<div class="set nw ${x.done?'done':''}"><span class="n">${j+1}</span>
+     <div class="field"><button class="pm" data-act="r" data-i="${i}" data-j="${j}" data-d="-1" aria-label="Fewer">−</button><input id="r${i}_${j}" inputmode="numeric" data-f="r" data-i="${i}" data-j="${j}" value="${esc(x.r)}" aria-label="${sec?'Seconds':'Reps'} set ${j+1}"><button class="pm" data-act="r" data-i="${i}" data-j="${j}" data-d="1" aria-label="More">+</button></div>
      <button class="tick" data-act="tick" data-i="${i}" data-j="${j}" aria-label="Mark set ${j+1} done">✓</button></div>`).join('')}</div>
-   <div class="links"><button class="link" data-act="addset" data-i="${i}">Add set</button>${it.sets.length>1?`<button class="link" data-act="delset" data-i="${i}">Remove last set</button>`:''}</div></section>`}
+   <div class="row"><button class="btn sm" data-act="addset" data-i="${i}">+ Add set</button>${it.sets.length>1?`<button class="btn sm" data-act="delset" data-i="${i}">Remove last set</button>`:''}</div></section>`}
 
 function runCard(s){const p=s.speeds;const bl=s.b||runPlan()[s.idx%runPlan().length].b;const test=s.rtype==='Test';
   return`<section class="ex run"><div class="eyebrow">Incline 1% · speeds from your 5K time of ${mmss(S.fiveK)}</div>
@@ -569,7 +595,7 @@ function renderHistory(){
   const counts={gym:0,home:0,run:0,swim:0};const since=dayOff(-27);SESS.filter(s=>s.date>=since).forEach(s=>counts[s.mode]++);
   let h=`<header class="top"><div><div class="eyebrow">Your training</div><h1>History</h1></div>${syncTag()}</header>`;
   if(!SESS.length)return h+`<div class="empty"><h3>No sessions yet</h3><p>Finish your first workout on the Today tab and it shows up here, with a strength chart for every lift.</p></div>`;
-  h+=`<div class="panel"><div class="eyebrow">Last 4 weeks</div><div class="row num">${['gym','home','run','swim'].map(m=>`<span class="chip ${m}">${counts[m]} ${{gym:'gym',home:'home',run:'runs',swim:'swims'}[m]}</span>`).join('')}</div></div>`;
+  h+=`<div class="panel"><div class="eyebrow">Last 4 weeks</div><div class="row num">${['gym','home','run','swim'].map(m=>`<span class="chip ${m}">${counts[m]} ${m==='run'||m==='swim'?m+(counts[m]===1?'':'s'):m}</span>`).join('')}</div></div>`;
   if(lifts.length)h+=`<div class="panel gym"><div class="row" style="justify-content:space-between"><div class="eyebrow">Strength trend</div>
     <select id="histEx" data-f="histEx" style="padding:6px 8px" aria-label="Choose lift">${lifts.map(l=>`<option value="${l}" ${l===histEx?'selected':''}>${esc(gx(l)?.n||l)}</option>`).join('')}</select></div>
     ${lastPt?`<div><span style="font-family:var(--f-display);font-size:32px;font-weight:700" class="num">${fw(Math.round(lastPt.v*2)/2)} kg</span> <span class="small muted">${asl?`assistance · best set ${fw(lastPt.top.w)} kg × ${lastPt.top.r}`:`estimated 1-rep max · best set ${fw(lastPt.top.w)} × ${lastPt.top.r}`}</span></div>`:''}
@@ -584,7 +610,7 @@ function renderHistory(){
 let resetArm=false;
 function renderPlan(){const p=paces(S.fiveK);
   return`<header class="top"><div><div class="eyebrow">Goal: get stronger</div><h1>Your plan</h1></div>${syncTag()}</header>
-  <div class="panel"><h2>How it works</h2>
+  <details class="panel" ${SESS.length?'':'open'}><summary><h2>How it works</h2></summary>
    <p><b>1. Pick a workout.</b> On Today, tap Gym, Home, Run or Swim and choose a session. There's no schedule: train when it suits you. A good week for getting stronger is three strength sessions and one cardio session.</p>
    <p><b>2. Log as you go.</b> Sets start with last time's numbers. Adjust the weight or reps, then tap ✓. A rest timer starts on its own. Skip anything you don't want to do: only ticked sets are saved. Tap Swap if a machine is taken.</p>
    <p><b>3. Tap Finish.</b> Nothing is saved or changes in your plan until you do. Switch workout drops the session without saving.</p>
@@ -602,24 +628,25 @@ function renderPlan(){const p=paces(S.fiveK);
     <li><b>My exercises:</b> add your own gym exercises (barbell, dumbbell, machine, assisted, timed or bodyweight) or home exercises (a ladder of harder variations).</li>
     <li><b>Runs and swims:</b> pick any session. The app suggests the next one so you work through the cycle. Test sessions measure your progress: a new 5K time updates your treadmill speeds, and each swim cycle makes send-offs 15 s faster.</li>
    </ul>
-   <p class="small muted">Your data is saved only on this device. Export a backup now and then (see Backup below).</p></div>
+   <p class="small muted">Your data is saved only on this device. Export a backup now and then (see Backup below).</p></details>
   <div class="panel gym"><h2>Gym routines</h2>
-   ${routines().map(r=>`<div><b>${esc(r.n)}</b><div class="small muted">${routineEx(r).map(id=>{const e=gx(id),L=S.lifts[id];return esc(e.n)+(e.k==='t'||e.k==='r'?'':' '+kgTxt(L?L.w:e.start,e.k))}).join(' · ')||'No exercises'}</div></div>`).join('')||'<p class="muted">No routines yet.</p>'}
+   <p class="small muted">Tap a routine to see its exercises and current weights.</p>
+   <div class="rlist">${routines().map(r=>{const ex=routineEx(r);return`<details><summary><b>${esc(r.n)} <span class="small muted">· ${ex.length} exercises</span></b></summary><div class="small muted">${ex.map(id=>{const e=gx(id),L=S.lifts[id];return esc(e.n)+(e.k==='t'||e.k==='r'?'':' '+kgTxt(L?L.w:e.start,e.k))}).join(' · ')||'No exercises'}</div></details>`}).join('')||'<p class="muted">No routines yet.</p>'}</div>
    <p class="small muted">Weight steps: +2.5 kg upper-body barbell, +5 kg lower-body barbell, +2 kg dumbbells, +5 kg most machines. Dumbbell weights are per hand.</p>
    <div class="row"><button class="btn" data-act="edit" data-v="routines-gym">Manage routines</button><button class="btn" data-act="edit" data-v="exlist">My exercises</button></div></div>
   <div class="panel home"><h2>Home routines</h2>
-   ${routines('home').map(r=>`<div><b>${esc(r.n)}</b><div class="small muted">${routineEx(r,'home').map(id=>esc(exName('home',id))).join(' · ')||'No exercises'}</div></div>`).join('')||'<p class="muted">No routines yet.</p>'}
+   <div class="rlist">${routines('home').map(r=>{const ex=routineEx(r,'home');return`<details><summary><b>${esc(r.n)} <span class="small muted">· ${ex.length} exercises</span></b></summary><div class="small muted">${ex.map(id=>esc(exName('home',id))).join(' · ')||'No exercises'}</div></details>`}).join('')||'<p class="muted">No routines yet.</p>'}</div>
    <div class="row"><button class="btn" data-act="edit" data-v="routines-home">Manage routines</button><button class="btn" data-act="edit" data-v="exlist">My exercises</button></div></div>
   <div class="panel run"><h2>Running · cycle ${S.runCycle}</h2>
    <label class="small muted" for="fivek">Current 5K time</label>
    <div class="row"><input id="fivek" data-f="fiveK" value="${mmss(S.fiveK)}" style="padding:8px;width:100px;font-size:16px" inputmode="numeric"><span class="small muted">Change it and every speed below updates.</span></div>
    <div class="row num small"><span>Easy <b>${f1(p.E)}</b></span><span>Long <b>${f1(p.L)}</b></span><span>Tempo <b>${f1(p.T)}</b></span><span>Interval <b>${f1(p.I)}</b> km/h</span></div>
-   <div class="tw"><table class="t">${runPlan().map((r,i)=>`<tr class="${i===S.q.run?'cur':''}"><td class="num">${i+1}</td><td>${esc(r.n)}</td><td class="muted">${r.t}</td></tr>`).join('')}</table></div>
+   <div class="tw"><table class="t">${runPlan().map((r,i)=>`<tr class="${i===S.q.run?'cur':''}"><td class="num">${i+1}</td><td>${esc(r.n)}${i===S.q.run?'<span class="tag">suggested</span>':''}</td><td class="muted">${r.t}</td></tr>`).join('')}</table></div>
    <p class="small muted">The Test session is a 5K time trial. Your new time sets the speeds for the next cycle.</p>
    <div class="row"><button class="btn" data-act="edit" data-v="runlist">Manage runs</button></div></div>
   <div class="panel swim"><h2>Swimming · cycle ${S.swimCycle}</h2>
    <p class="small">“Leave every 3:00” means you push off the wall every 3 minutes. Whatever is left after your 50 m is rest. Each cycle the send-offs get 15 seconds faster.</p>
-   <div class="tw"><table class="t">${swimPlan().map((w,i)=>`<tr class="${i===S.q.swim?'cur':''}"><td class="num">${i+1}</td><td>${esc(w.n)}</td><td class="muted">${w.t}</td><td class="num">${swimDist(w)} m</td></tr>`).join('')}</table></div>
+   <div class="tw"><table class="t">${swimPlan().map((w,i)=>`<tr class="${i===S.q.swim?'cur':''}"><td class="num">${i+1}</td><td>${esc(w.n)}${i===S.q.swim?'<span class="tag">suggested</span>':''}</td><td class="muted">${w.t}</td><td class="num">${swimDist(w)} m</td></tr>`).join('')}</table></div>
    ${S.swim400?`<p class="small">Last 400 m test: <b class="num">${mmss(S.swim400)}</b></p>`:''}
    <div class="row"><button class="btn" data-act="edit" data-v="swimlist">Manage swims</button></div></div>
   <div class="panel"><h2>Backup</h2><p class="small muted">Your data lives only in this browser on this device. Download a backup now and then, and use it to move to a new phone.</p>
@@ -642,19 +669,20 @@ function renderSheet(){const el=$('#sheet');if(!sheet){el.innerHTML='';return}
         +`<button class="btn" data-act="edit" data-v="${m}list">Manage ${m}s</button>`}
     h=`<div class="${m}" style="display:flex;flex-direction:column;gap:8px">${h}</div>`}
   else if(sheet.t==='swap'){const it=S.active.items[sheet.i];const base=gx(it.base);const opts=[it.base,...(base?.alts||[])].filter(id=>id!==it.ex&&gx(id));
-    const rest=gymIds().filter(id=>id!==it.ex&&!opts.includes(id));
-    const opt=id=>{const x=gx(id);return`<button class="opt" data-act="doswap" data-id="${id}"><span><b>${esc(x.n)}</b></span><span class="small muted num">${x.k==='t'||x.k==='r'?'':kgTxt(S.lifts[id]?.w??x.start,x.k)}</span></button>`};
-    h=`<h2>Swap ${esc(it.name)}</h2><p class="small muted">Machine taken or something doesn't feel right? Each option keeps its own weight history. This only changes today's session.</p>`+
-      (opts.length?`<div class="eyebrow">Suggested</div>`+opts.map(opt).join(''):'')+`<div class="eyebrow">Any exercise</div>`+rest.map(opt).join('')}
-  else if(sheet.t==='switch'){h=`<h2>Switch workout?</h2><p>This drops today's ${esc(S.active.title)} without saving. Your plan stays where it was, so it will be offered again next time.</p>
+    const rest=gymIds().filter(id=>id!==it.ex&&!opts.includes(id)).sort((a,b)=>gx(a).n.localeCompare(gx(b).n));
+    const opt=g=>id=>{const x=gx(id);return`<button class="opt" data-act="doswap" data-id="${id}" data-g="${g}" data-name="${esc(x.n.toLowerCase())}"><span><b>${esc(x.n)}</b></span><span class="small muted num">${x.k==='t'||x.k==='r'?'':kgTxt(S.lifts[id]?.w??x.start,x.k)}</span></button>`};
+    h=`<h2>Swap ${esc(it.name)}</h2><p class="small muted">Machine taken or something doesn't feel right? Each option keeps its own weight history. This only changes today's session.</p><input type="search" data-f="swapq" placeholder="Search exercises" aria-label="Search exercises" autocomplete="off">`+
+      (opts.length?`<div class="eyebrow" data-gh="s">Suggested</div>`+opts.map(opt('s')).join(''):'')+`<div class="eyebrow" data-gh="a">All exercises, A–Z</div>`+rest.map(opt('a')).join('')+`<p class="small muted" id="swapnone" hidden>No exercise matches. You can create one in Plan → My exercises.</p>`}
+  else if(sheet.t==='switch'){h=`<h2>Switch workout?</h2><p>This drops today's ${esc(S.active.title)} without saving. Nothing in your plan changes.</p>
     <button class="btn danger block" data-act="discard">Drop it and pick again</button>`}
-  el.innerHTML=`<div class="scrim" data-act="close"><div class="sheet" role="dialog" aria-modal="true">${h}<button class="btn block" data-act="close">Cancel</button></div></div>`}
+  el.innerHTML=`<div class="scrim" data-act="close"><div class="sheet" role="dialog" aria-modal="true"><button class="xbtn" data-act="close" aria-label="Close">✕</button>${h}<button class="btn block" data-act="close">Cancel</button></div></div>`}
 
 
 /* ===================== PLAN EDITOR ===================== */
 // ED holds the editor being shown (view==='edit'). Inputs write straight into ED via data-e paths; Save commits to S.plan.
 let ED=null;
-function setP(o,path,v){const k=path.split('.');const last=k.pop();k.reduce((a,x)=>a[x],o)[last]=v}
+const edDirty=()=>!!(ED&&(ED.dirty||ED.ret?.dirty));
+function setP(o,path,v){if(o===ED)ED.dirty=true;const k=path.split('.');const last=k.pop();k.reduce((a,x)=>a[x],o)[last]=v}
 const getP=(o,path)=>path.split('.').reduce((a,x)=>a?.[x],o);
 const numOr=(v,d)=>{const n=parseFloat(String(v).replace(',','.'));return isFinite(n)?n:d};
 const intOr=(v,d,min=0)=>Math.max(min,Math.round(numOr(v,d)));
@@ -737,11 +765,11 @@ function renderEditor(){const e=ED;
     const sec=(m,title)=>`<div class="panel ${m}"><h2>${title}</h2>${list(m).map(([id,x])=>`<div class="edrow"><span><b>${esc(m==='gym'?x.n:x.lv[0][0])}</b><br><span class="small muted">${x.s} × ${x.lo}–${x.hi}${(m==='gym'?x.k==='t':x.u==='sec')?' s':''}${m==='home'?` · ${x.lv.length} level${x.lv.length>1?'s':''}`:''}</span></span><button class="btn sm" data-act="e-editex" data-mode="${m}" data-id="${id}">Edit</button></div>`).join('')||'<p class="small muted">None yet.</p>'}
       <div><button class="btn" data-act="e-newex" data-mode="${m}">New ${m} exercise</button></div></div>`;
     return`<div class="ed">${edHead('Edit plan','My exercises')}<p class="small muted">Create exercises, then add them to a routine.</p>
-    ${sec('gym','Gym')}${sec('home','Home')}<div><button class="btn" data-act="e-cancel">Back to plan</button></div></div>`}
+    ${sec('gym','Gym')}${sec('home','Home')}<div><button class="btn" data-act="e-cancel">Done</button></div></div>`}
   if(e.t==='runlist'||e.t==='swimlist'){const run=e.t==='runlist',L=run?runPlan():swimPlan(),q=run?S.q.run:S.q.swim,c=run?'run':'swim',pp=paces(S.fiveK);
     return`<div class="ed">${edHead('Edit plan',run?'Runs':'Swims')}
     <p class="small muted">You can pick any session when you start. The app suggests them in this order, then the cycle repeats. ${run?'Finishing a Test session saves your 5K time, updates your speeds and starts a new cycle.':'Finishing a Test session starts a new cycle with send-offs 15 s faster.'} Changes save straight away.</p>
-    <div class="hist">${L.map((r,i)=>`<div class="edrow ${c} ${i===q?'cur':''}"><span><b>${i+1}. ${esc(r.n)}</b><br><span class="small muted">${esc(r.t)} · ${run?`about ${Math.round(runMin(r,pp))} min`:swimDist(r)+' m'}${i===q?' · next':''}</span></span>
+    <div class="hist">${L.map((r,i)=>`<div class="edrow ${c} ${i===q?'cur':''}"><span><b>${i+1}. ${esc(r.n)}</b><br><span class="small muted">${esc(r.t)} · ${run?`about ${Math.round(runMin(r,pp))} min`:swimDist(r)+' m'}${i===q?' · suggested':''}</span></span>
       <span class="row" style="flex-wrap:nowrap"><button class="btn sm" data-act="e-open" data-v="${c}" data-i="${i}">Edit</button>${mvBtns('list',i,L.length)}</span></div>`).join('')}</div>
     <div class="row"><button class="btn" data-act="e-open" data-v="${c}" data-i="-1">Add a ${c}</button><button class="btn" data-act="e-cancel">Done</button></div>
     ${P()[c]?`<button class="link" data-act="e-reset">Restore the default ${c} plan</button>`:''}</div>`}
@@ -765,7 +793,7 @@ function renderEditor(){const e=ED;
     <div><button class="btn" data-act="e-addblock">Add a block</button></div>${edFoot('')}</div>`}
   return''}
 
-function edAddEx(id){curList(ED).push(id);render()}
+function edAddEx(id){curList(ED).push(id);ED.dirty=true;render()}
 function edBack(){if(ED?.ret){ED=ED.ret;render()}else if(ED&&(ED.t==='run'||ED.t==='swim'))openEd(ED.t+'list');else if(ED?.t==='routine')openEd('routines',{mode:ED.m});else{ED=null;view='plan';render()}window.scrollTo(0,0)}
 function commitList(c,L,q){P()[c]=L;S.q[c]=q;clampQ();save()}
 // Sets/reps/rest/step edits are stored as differences from each exercise's definition.
@@ -799,14 +827,14 @@ function edSave(){const e=ED;
 function edClick(a,b){const e=ED,i=+b.dataset.i;
   switch(a){
    case'edit':openEd(b.dataset.v);return;
-   case'e-cancel':edBack();return;
+   case'e-cancel':if(e.dirty&&!confirm('Discard your unsaved changes?'))return;edBack();return;
    case'e-save':edSave();return;
    case'e-open':openEd(b.dataset.v,{i,mode:e.m});return;
    case'e-newex':openEd('ex',{mode:b.dataset.mode,ret:e.t==='routine'?e:null});return;
    case'e-addpreset':{const m=e.m,pr=PRESETS[m].find(x=>x.id===b.dataset.id);P()[RKEY[m]]=[...clone(routines(m)),presetRoutine(pr,m)];save();render();toast(`${pr.n} added back.`);return}
    case'e-delroutine':{const m=e.m;if(!confirm(`Delete the routine "${routines(m)[e.i].n}"? Past sessions stay in History.`))return;const R=clone(routines(m));R.splice(e.i,1);P()[RKEY[m]]=R;save();toast('Routine deleted.');openEd('routines',{mode:m});return}
    case'e-editex':openEd('ex',{mode:b.dataset.mode,id:b.dataset.id});return;
-   case'e-addblock':e.draft.b.push(e.t==='run'?runToEd(T_('Run',10,'E','')):swimToEd({l:'Main',n:4,d:50,txt:'freestyle',on:180,rest:0}));render();return;
+   case'e-addblock':e.dirty=true;e.draft.b.push(e.t==='run'?runToEd(T_('Run',10,'E','')):swimToEd({l:'Main',n:4,d:50,txt:'freestyle',on:180,rest:0}));render();return;
    case'e-mv':case'e-rm':{const path=b.dataset.p;
      if(path==='routines'){const m=e.m,R=clone(routines(m));
        if(a==='e-rm'){if(!confirm(`Delete the routine "${R[i].n}"? Past sessions stay in History.`))return;R.splice(i,1)}else{const j=i+ +b.dataset.d;[R[i],R[j]]=[R[j],R[i]]}
@@ -815,7 +843,7 @@ function edClick(a,b){const e=ED,i=+b.dataset.i;
        if(a==='e-rm'){if(L.length<2){toast('Keep at least one session.');return}if(!confirm(`Remove "${L[i].n}" from the plan?`))return;L.splice(i,1);if(i<q)q--}
        else{const j=i+ +b.dataset.d;[L[i],L[j]]=[L[j],L[i]];if(q===i)q=j;else if(q===j)q=i}
        commitList(c,L,q);render();return}
-     const L=getP(e,path);if(a==='e-rm')L.splice(i,1);else{const j=i+ +b.dataset.d;[L[i],L[j]]=[L[j],L[i]]}render();return}
+     const L=getP(e,path);e.dirty=true;if(a==='e-rm')L.splice(i,1);else{const j=i+ +b.dataset.d;[L[i],L[j]]=[L[j],L[i]]}render();return}
    case'e-reset':{
      const c=e.t==='runlist'?'run':'swim';if(!confirm(`Restore the default ${c} plan? Your edited ${c} sessions will be replaced.`))return;
      delete P()[c];S.q[c]=0;save();render();toast(`Default ${c} plan restored.`);return}
@@ -830,7 +858,7 @@ function edClick(a,b){const e=ED,i=+b.dataset.i;
 let tEnd=0,tDur=0,tInt=null,beeped=false,actx=null,wake=null;
 function startTimer(sec){tDur=sec;tEnd=Date.now()+sec*1000;beeped=false;clearInterval(tInt);tInt=setInterval(renderTimer,250);renderTimer()}
 function stopTimer(){tEnd=0;clearInterval(tInt);renderTimer()}
-function renderTimer(){const el=$('#timer');if(!tEnd||!S.active){el.innerHTML='';return}
+function renderTimer(){const el=$('#timer'),on=!!(tEnd&&S.active);document.body.classList.toggle('has-timer',on);if(!on){el.innerHTML='';return}
   const left=(tEnd-Date.now())/1000;const over=left<=0;
   if(over&&!beeped){beeped=true;beep();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
   if(left<-90){stopTimer();return}
@@ -850,7 +878,7 @@ document.addEventListener('click',ev=>{
   if(a==='close'&&ev.target!==b&&b.classList.contains('scrim'))return; // clicks inside sheet
   const s=S.active,i=+b.dataset.i,j=+b.dataset.j;
   switch(a){
-   case'tab':view=b.dataset.v;ED=null;delArm=null;resetArm=false;sheet=null;render();window.scrollTo(0,0);return;
+   case'tab':if(view==='edit'&&edDirty()&&!confirm('Discard your unsaved changes?'))return;view=b.dataset.v;ED=null;delArm=null;resetArm=false;sheet=null;render();window.scrollTo(0,0);return;
    case'choose':sheet={t:'choose',mode:b.dataset.mode};renderSheet();return;
    case'pick':{const m=b.dataset.mode,k=b.dataset.k;S.active=m==='gym'||m==='home'?buildRoutine(m,k):m==='run'?buildRun(+k):buildSwim(+k);sheet=null;break}
    case'close':sheet=null;renderSheet();return;
@@ -868,6 +896,7 @@ document.addEventListener('click',ev=>{
    case'lvl':{const it=s.items[i];it.level=Math.max(0,Math.min((hx(it.ex)?.lv.length||1)-1,it.level+ +b.dataset.d));it.up=false;it.sets.forEach(x=>{if(!x.done)x.r=it.lo});break}
    case'chk':s.checks[+b.dataset.k]=!s.checks[+b.dataset.k];break;
    case'finish':finish();return;
+   case'tofinish':$('#finishPanel')?.scrollIntoView({behavior:'smooth',block:'center'});return;
    case't30':tEnd+=30000;tDur+=30;beeped=false;renderTimer();return;
    case'tstop':stopTimer();return;
    case'export':exportData();return;
@@ -880,7 +909,9 @@ document.addEventListener('click',ev=>{
   save();render();
   if(a==='pick'){window.scrollTo(0,0);keepAwake()}
 });
-document.addEventListener('input',ev=>{const t=ev.target;if(t.dataset.e&&ED&&t.tagName!=='SELECT'){setP(ED,t.dataset.e,t.value);return}
+document.addEventListener('input',ev=>{const t=ev.target;
+  if(t.dataset.f==='swapq'){const q=t.value.trim().toLowerCase();let n=0;document.querySelectorAll('.sheet .opt[data-name]').forEach(o=>{const show=!q||o.dataset.name.includes(q);o.hidden=!show;n+=show});
+    document.querySelectorAll('.sheet [data-gh]').forEach(e=>e.hidden=!document.querySelector(`.sheet .opt[data-g="${e.dataset.gh}"]:not([hidden])`));const z=$('#swapnone');if(z)z.hidden=n>0;return}if(t.dataset.e&&ED&&t.tagName!=='SELECT'){setP(ED,t.dataset.e,t.value);return}
   const f=t.dataset.f;if(!f)return;const s=S.active;
   if(f==='w'||f==='r'){const x=s.items[+t.dataset.i].sets[+t.dataset.j];x[f]=t.value===''?'':(+t.value.replace(',','.'));save();return}
   if(f==='notes'){s.notes=t.value;save();return}
