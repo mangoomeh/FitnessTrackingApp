@@ -2,14 +2,14 @@
 
 **Live app:** https://mangoomeh.github.io/morning-pick/
 
-A phone-first workout planner and tracker. Each morning you choose **Gym**, **Home**, **Run** or **Swim**, and the app gives you the next session in that plan and makes logging quick.
+A phone-first workout planner and tracker. Each time you train, choose **Gym**, **Home**, **Run** or **Swim** and pick the session you want. Logging is quick.
 
-- A 4-day upper/lower strength rotation that Gym and Home share, with automatic weight and level progression
-- Prefilled sets, a rest timer, a plate calculator, exercise swaps and a "short on time" mode
-- A 12-session treadmill plan with speeds worked out from your 5K time
-- A 10-session 50 m pool plan whose send-off times get faster each cycle
-- History, a strength chart (estimated 1RM) and 5K test times
-- Editable plan: change strength days, create custom exercises, and edit run and swim sessions (Plan tab)
+- Your own gym and home routines (create, edit, reorder, delete), preloaded with full body, upper/lower and push/pull/legs templates
+- Automatic progression: weights go up, bodyweight moves level up, and assisted machines need less assistance
+- Prefilled sets, a rest timer, a plate calculator and exercise swaps; skip anything you don't tick
+- Treadmill runs with speeds worked out from your 5K time, and 50 m pool swims whose send-off times get faster each cycle. Both are editable, and the app suggests the next session.
+- History, a strength chart and 5K test times
+- Custom exercises for gym and home
 - Installable (PWA), works offline, Export/Import backup
 
 ## Stack
