@@ -1,5 +1,5 @@
 // Bump VERSION whenever you change a file below so phones pick up the update.
-const VERSION = 'mp-v3';
+const VERSION = 'mp-v4';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
