@@ -203,12 +203,11 @@ table.t tr.cur td:first-child{box-shadow:inset 3px 0 0 var(--c)}
 
 <script>
 /* ===================== PROGRAMME DATA ===================== */
-const TRAIN_DAYS=[1,2,4,5]; // Mon Tue Thu Fri
 const ROT=['UA','LA','UB','LB'];
 const DAYNAME={UA:'Upper A',LA:'Lower A',UB:'Upper B',LB:'Lower B'};
 const DAYFOCUS={UA:'Bench focus',LA:'Squat focus',UB:'Overhead press focus',LB:'Deadlift focus'};
 
-// k: bb barbell, db dumbbell (weight per hand), mc machine/cable, t timed, r reps only
+// k: bb barbell, db dumbbell (weight per hand), mc machine/cable, as assisted machine (weight = assistance, lower is harder), t timed, r reps only
 const GYM={
  bench:{n:'Bench press',k:'bb',lo:6,hi:8,s:3,inc:2.5,start:35,rest:150,cue:'Shoulder blades pinned, bar to lower chest, feet planted.',alts:['db_bench','machine_press']},
  db_bench:{n:'Dumbbell bench press',k:'db',lo:8,hi:10,s:3,inc:2,start:14,rest:120,cue:'Weight shown is per dumbbell.'},
@@ -218,8 +217,10 @@ const GYM={
  cable_row:{n:'Seated cable row',k:'mc',lo:10,hi:12,s:3,inc:5,start:35,rest:90,cue:'Chest up, squeeze shoulder blades together at the end.',alts:['cs_row']},
  db_ohp:{n:'Seated DB shoulder press',k:'db',lo:8,hi:12,s:3,inc:2,start:10,rest:90,cue:'Weight per dumbbell. Elbows slightly in front of the body.',alts:['machine_ohp']},
  machine_ohp:{n:'Machine shoulder press',k:'mc',lo:8,hi:12,s:3,inc:5,start:20,rest:90,cue:''},
- pulldown:{n:'Lat pulldown',k:'mc',lo:8,hi:12,s:3,inc:5,start:35,rest:90,cue:'Pull elbows down to your ribs, chest up to meet the bar.',alts:['ng_pulldown','cs_row']},
- ng_pulldown:{n:'Neutral-grip pulldown',k:'mc',lo:8,hi:12,s:3,inc:5,start:35,rest:90,cue:'Palms facing each other, pull to upper chest.',alts:['pulldown']},
+ pulldown:{n:'Lat pulldown',k:'mc',lo:8,hi:12,s:3,inc:5,start:35,rest:90,cue:'Pull elbows down to your ribs, chest up to meet the bar.',alts:['ng_pulldown','assisted_pullup','cs_row']},
+ ng_pulldown:{n:'Neutral-grip pulldown',k:'mc',lo:8,hi:12,s:3,inc:5,start:35,rest:90,cue:'Palms facing each other, pull to upper chest.',alts:['pulldown','assisted_pullup']},
+ assisted_pullup:{n:'Assisted pull-up',k:'as',lo:6,hi:10,s:3,inc:5,start:35,rest:120,cue:'The number is how much the machine helps you. Lower is harder. Full hang at the bottom, chin over the bar.',alts:['pulldown','ng_pulldown']},
+ assisted_dip:{n:'Assisted dip',k:'as',lo:6,hi:10,s:3,inc:5,start:30,rest:90,cue:'The number is how much the machine helps you. Lower is harder. Lean slightly forward, upper arms to parallel.',alts:['pushdown']},
  db_curl:{n:'Dumbbell curl',k:'db',lo:10,hi:12,s:2,inc:1,start:8,rest:60,cue:'Weight per dumbbell. Elbows stay by your sides.',alts:['cable_curl']},
  cable_curl:{n:'Cable curl',k:'mc',lo:10,hi:15,s:2,inc:2.5,start:15,rest:60,cue:''},
  squat:{n:'Back squat',k:'bb',lo:5,hi:8,s:3,inc:5,start:40,rest:180,cue:'Brace hard, sit down between your heels, hips at least to knee height.',alts:['smith_squat','goblet','leg_press']},
@@ -232,7 +233,7 @@ const GYM={
  plank:{n:'Plank',k:'t',lo:30,hi:60,s:3,inc:0,start:0,rest:60,cue:'Ribs down, glutes squeezed.'},
  ohp:{n:'Overhead press',k:'bb',lo:5,hi:8,s:3,inc:2.5,start:22.5,rest:150,cue:'Squeeze glutes, press straight up, head through at the top.',alts:['db_ohp','machine_ohp']},
  incline_db:{n:'Incline DB press',k:'db',lo:8,hi:12,s:3,inc:2,start:12,rest:90,cue:'Bench at about 30°. Weight per dumbbell.',alts:['machine_press']},
- pushdown:{n:'Triceps pushdown',k:'mc',lo:10,hi:15,s:2,inc:2.5,start:15,rest:60,cue:'Elbows pinned to your sides.',alts:['oh_ext']},
+ pushdown:{n:'Triceps pushdown',k:'mc',lo:10,hi:15,s:2,inc:2.5,start:15,rest:60,cue:'Elbows pinned to your sides.',alts:['oh_ext','assisted_dip']},
  oh_ext:{n:'Overhead DB triceps extension',k:'db',lo:10,hi:15,s:2,inc:2,start:10,rest:60,cue:'One dumbbell, both hands.'},
  face_pull:{n:'Face pull',k:'mc',lo:12,hi:15,s:2,inc:2.5,start:12.5,rest:60,cue:'Rope to forehead, elbows high. Good for shoulder health.'},
  deadlift:{n:'Deadlift',k:'bb',lo:4,hi:6,s:3,inc:5,start:50,rest:180,cue:'Bar over midfoot, chest up, push the floor away. Reset each rep.',alts:['trap_dl','rdl']},
@@ -313,6 +314,8 @@ const nice=iso=>new Date(iso+'T12:00:00').toLocaleDateString('en-GB',{weekday:'s
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const clone=o=>JSON.parse(JSON.stringify(o));
 const e1rm=(w,r)=>r>0?w*(1+r/30):0;
+const isAs=k=>k==='as';
+const kgTxt=(w,k)=>isAs(k)?`${fw(w)} kg assist`:`${fw(w)} kg`;
 function paces(fiveK){const v=5/(fiveK/3600);return{W:5.5,R:5.0,E:+f1(v*.82),L:+f1(v*.8),T:+f1(v*.94),I:+f1(v*1.06),F:+f1(v)}}
 function plates(w){if(w<20)return null;let per=(w-20)/2;if(per<=0)return'Empty bar (20 kg)';const out=[];for(const p of[25,20,15,10,5,2.5,1.25]){while(per>=p-1e-9){out.push(p);per-=p}}return'Per side: '+(out.length?out.map(fw).join(' + '):'nothing')+(per>.01?' (closest)':'')}
 function swimLine(b,cyc){let s=(b.n>1?`${b.n} × ${b.d} m `:`${b.d} m `)+(b.txt||'');if(b.on){const on=Math.max(Math.min(105,b.on),b.on-15*(cyc-1));s+=` · leave every ${mmss(on)}`}else if(b.rest)s+=` · ${b.rest} s rest`;return s}
@@ -388,8 +391,8 @@ function finish(){const s=S.active;if(!s)return;let msg='Saved.';
       const hitTop=done.length>=it.sets.length&&done.every(x=>+x.r>=it.hi);
       if(it.home){const h=hx(it.ex);if(!h)continue;const nl=hitTop?Math.min(it.level+1,h.lv.length-1):it.level;
         S.levels[it.ex]=nl;S.lifts['h_'+it.ex]={level:it.level,up:nl>it.level,last:done.map(x=>({r:+x.r})),date:s.date}}
-      else{const e=gx(it.ex)||{inc:0};const w=+done[0].w||0;const nw=(hitTop&&e.inc)?w+e.inc:w;
-        S.lifts[it.ex]={w:nw,up:nw>w,last:done.map(x=>({w:+x.w,r:+x.r})),date:s.date}}}
+      else{const e=gx(it.ex)||{inc:0};const w=+done[0].w||0;const nw=(hitTop&&e.inc)?(isAs(it.k)?Math.max(0,w-e.inc):w+e.inc):w;
+        S.lifts[it.ex]={w:nw,up:nw!==w,last:done.map(x=>({w:+x.w,r:+x.r})),date:s.date}}}
     S.q.strength=(ROT.indexOf(s.day)+1)%4;msg=`Saved. Next strength day: ${DAYNAME[ROT[S.q.strength]]}.`}
   else if(s.mode==='run'){const t=parseT(s.log.test);
     if(s.rtype==='Test'){if(t&&t>600){S.fiveK=t;msg=`Saved. New 5K time ${mmss(t)}: run speeds updated.`}S.q.run=0;S.runCycle++}
@@ -421,7 +424,7 @@ function render(){
 function syncTag(){return`<span class="sync"><i></i>Saved on this device</span>`}
 
 function renderToday(){
-  const d=new Date(),wd=d.getDay(),isTrain=TRAIN_DAYS.includes(wd);
+  const d=new Date();
   const done=SESS.filter(s=>s.date===today());
   const nd=ROT[S.q.strength],ri=S.q.run,si=S.q.swim;
   const card=(mode,label,plate,next,meta,warn)=>`<div class="mode ${mode}">
@@ -430,7 +433,6 @@ function renderToday(){
     <div class="acts"><button class="go" data-act="start" data-mode="${mode}">Start</button><button class="alt" data-act="choose" data-mode="${mode}" aria-label="Pick a different ${label} session">Other</button></div></div></div>`;
   const last=SESS[0];
   return`<header class="top"><div><div class="eyebrow">${d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}</div><h1>What are we doing today?</h1></div>${syncTag()}</header>
-  ${isTrain?'':`<div class="note">Not one of your planned days (Mon, Tue, Thu, Fri). Rest is part of getting stronger, but you can still log a session.</div>`}
   ${backupDue()?`<div class="note">It's been a while since your last backup. <button class="link" style="color:inherit" data-act="export">Export one now</button> so a new phone or cleared browser doesn't lose your history.</div>`:''}
   ${done.length?`<div class="note">Already logged today: ${done.map(s=>esc(s.title)).join(', ')}.</div>`:''}
   <div class="picker">
@@ -457,18 +459,18 @@ function renderActive(){const s=S.active;const isStr=s.mode==='gym'||s.mode==='h
   return h}
 
 function gymCard(it,i){const e=gx(it.ex)||{alts:[],cue:'',inc:0};const timed=it.k==='t',ro=it.k==='r';const L=S.lifts[it.ex];
-  const unit=it.k==='db'?'kg each':'kg';
-  const last=L?.last?`Last time (${nice(L.date)}): <b class="num">${L.last.map(x=>timed?x.r+' s':ro?x.r:fw(x.w)+'×'+x.r).join(', ')}</b>`:'';
+  const unit=it.k==='db'?'kg each':isAs(it.k)?'kg assist':'kg';
+  const last=L?.last?`Last time (${nice(L.date)}): <b class="num">${L.last.map(x=>timed?x.r+' s':ro?x.r:fw(x.w)+'×'+x.r).join(', ')}${isAs(it.k)?' kg assist':''}</b>`:'';
   const pl=it.k==='bb'?plates(+it.sets[0].w):null;
   return`<section class="ex gym"><div class="ex-top"><div><div class="ex-name">${esc(it.name)}</div>
    <div class="target">${it.sets.length} × ${it.lo}–${it.hi}${timed?' s':' reps'} · ${it.rest>=120?(it.rest%30?mmss(it.rest):it.rest/60)+' min':it.rest+' s'} rest</div></div>
    <button class="btn" data-act="swap" data-i="${i}">Swap</button></div>
-   ${it.up?`<div><span class="badge">+${fw(e.inc)} kg: you hit the top of the range last time</span></div>`:''}
-   ${it.first&&!timed&&!ro?`<p class="cue">First time: the weight is a starting guess. Pick a load you could lift 2–3 more reps with, and adjust it here.</p>`:''}
+   ${it.up?`<div><span class="badge">${isAs(it.k)?(+it.sets[0].w>0?`${fw(e.inc)} kg less assistance`:'No assistance: try the full bodyweight version'):`+${fw(e.inc)} kg`}: you hit the top of the range last time</span></div>`:''}
+   ${it.first&&!timed&&!ro?`<p class="cue">${isAs(it.k)?'First time: the assistance is a starting guess. Pick an amount that leaves 2–3 reps in reserve, and adjust it here.':'First time: the weight is a starting guess. Pick a load you could lift 2–3 more reps with, and adjust it here.'}</p>`:''}
    ${last?`<div class="lastline">${last}</div>`:''}
    ${e.cue?`<p class="cue">${esc(e.cue)}</p>`:''}
    <div class="sets">${it.sets.map((x,j)=>`<div class="set ${timed||ro?'nw':''} ${x.done?'done':''}"><span class="n">${j+1}</span>
-     ${timed||ro?'':`<div class="field"><button class="pm" data-act="w" data-i="${i}" data-j="${j}" data-d="-1" aria-label="Less weight">−</button><input id="w${i}_${j}" inputmode="decimal" data-f="w" data-i="${i}" data-j="${j}" value="${fw(x.w)}" aria-label="Weight set ${j+1}"><span class="u">${unit}</span><button class="pm" data-act="w" data-i="${i}" data-j="${j}" data-d="1" aria-label="More weight">+</button></div>`}
+     ${timed||ro?'':`<div class="field"><button class="pm" data-act="w" data-i="${i}" data-j="${j}" data-d="-1" aria-label="${isAs(it.k)?'Less assistance (harder)':'Less weight'}">−</button><input id="w${i}_${j}" inputmode="decimal" data-f="w" data-i="${i}" data-j="${j}" value="${fw(x.w)}" aria-label="${isAs(it.k)?'Assistance':'Weight'} set ${j+1}"><span class="u">${unit}</span><button class="pm" data-act="w" data-i="${i}" data-j="${j}" data-d="1" aria-label="${isAs(it.k)?'More assistance (easier)':'More weight'}">+</button></div>`}
      <div class="field"><input id="r${i}_${j}" inputmode="numeric" data-f="r" data-i="${i}" data-j="${j}" value="${esc(x.r)}" aria-label="${timed?'Seconds':'Reps'} set ${j+1}"><span class="u">${timed?'sec':'reps'}</span></div>
      <button class="tick" data-act="tick" data-i="${i}" data-j="${j}" aria-label="Mark set ${j+1} done">✓</button></div>`).join('')}</div>
    ${pl?`<div class="plates num">${pl}</div>`:''}
@@ -509,19 +511,21 @@ function swimCard(s){const w={b:s.b||swimPlan()[s.idx%swimPlan().length].b};cons
 
 function summary(s){if(s.items){const it=s.items.filter(i=>i.sets.some(x=>x.done));
   return it.slice(0,3).map(i=>{const d=i.sets.filter(x=>x.done);const nm=i.home?(hx(i.ex)?.lv[i.level]?.[0]||i.name||i.ex):i.name;
-    return nm+' '+(i.home||i.k==='t'||i.k==='r'?d.map(x=>x.r).join('/'):fw(Math.max(...d.map(x=>+x.w)))+' kg × '+d.map(x=>x.r).join('/'))}).join(' · ')+(it.length>3?` · +${it.length-3} more`:'')||'No sets ticked'}
+    return nm+' '+(i.home||i.k==='t'||i.k==='r'?d.map(x=>x.r).join('/'):kgTxt(isAs(i.k)?Math.min(...d.map(x=>+x.w)):Math.max(...d.map(x=>+x.w)),i.k)+' × '+d.map(x=>x.r).join('/'))}).join(' · ')+(it.length>3?` · +${it.length-3} more`:'')||'No sets ticked'}
   const l=s.log||{};const bits=[];if(l.min)bits.push(l.min+' min');if(l.km)bits.push(l.km+' km');if(s.mode==='swim'&&(s.dist??swimPlan()[s.idx]))bits.push((s.dist??swimDist(swimPlan()[s.idx]))+' m planned');if(l.test)bits.push('test '+l.test);if(l.rpe)bits.push('effort '+l.rpe+'/10');return bits.join(' · ')||'Logged'}
 
 /* ---------- history ---------- */
 let histEx=null,delArm=null;
 function liftSeries(id){return SESS.filter(s=>s.mode==='gym').map(s=>{const it=s.items.find(i=>i.ex===id);if(!it)return null;
-  const d=it.sets.filter(x=>x.done&&+x.r>0);if(!d.length)return null;return{date:s.date,ts:s.ts,v:Math.max(...d.map(x=>e1rm(+x.w,+x.r))),top:d.reduce((a,x)=>+x.w>+a.w?x:a,d[0])}}).filter(Boolean).reverse()}
-function chart(pts){if(pts.length<2)return`<p class="small muted">One more session with this lift and a trend line appears here.</p>`;
+  const d=it.sets.filter(x=>x.done&&+x.r>0);if(!d.length)return null;
+  if(isAs(it.k)){const top=d.reduce((a,x)=>+x.w<+a.w?x:a,d[0]);return{date:s.date,ts:s.ts,v:+top.w,top}}
+  return{date:s.date,ts:s.ts,v:Math.max(...d.map(x=>e1rm(+x.w,+x.r))),top:d.reduce((a,x)=>+x.w>+a.w?x:a,d[0])}}).filter(Boolean).reverse()}
+function chart(pts,lbl='Estimated one-rep max over time'){if(pts.length<2)return`<p class="small muted">One more session with this lift and a trend line appears here.</p>`;
   const W=320,H=150,pl=36,pr=10,pt_=12,pb=24;const vs=pts.map(p=>p.v);let lo=Math.min(...vs),hi=Math.max(...vs);if(hi-lo<5){lo-=2.5;hi+=2.5}
   lo=Math.floor(lo/5)*5;hi=Math.ceil(hi/5)*5;const x=i=>pl+i*(W-pl-pr)/(pts.length-1),y=v=>pt_+(hi-v)*(H-pt_-pb)/(hi-lo);
   const ticks=[lo,(lo+hi)/2,hi];const line=pts.map((p,i)=>`${x(i).toFixed(1)},${y(p.v).toFixed(1)}`).join(' ');
   const area=`${x(0)},${H-pb} ${line} ${x(pts.length-1)},${H-pb}`;const L=pts.length-1;
-  return`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Estimated one-rep max over time">
+  return`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${lbl}">
    ${ticks.map(t=>`<line x1="${pl}" x2="${W-pr}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)" stroke-width="1"/><text x="${pl-6}" y="${y(t)+4}" text-anchor="end">${fw(Math.round(t*2)/2)}</text>`).join('')}
    <polygon points="${area}" fill="var(--gym)" fill-opacity=".12"/><polyline points="${line}" fill="none" stroke="var(--gym)" stroke-width="2.5" stroke-linejoin="round"/>
    <circle cx="${x(L)}" cy="${y(pts[L].v)}" r="4.5" fill="var(--gym)"/>
@@ -529,7 +533,7 @@ function chart(pts){if(pts.length<2)return`<p class="small muted">One more sessi
 function renderHistory(){
   const lifts=[...new Set(SESS.filter(s=>s.mode==='gym').flatMap(s=>s.items.filter(i=>i.sets.some(x=>x.done)&&!['t','r'].includes(i.k)).map(i=>i.ex)))];
   if(!histEx||!lifts.includes(histEx))histEx=lifts.includes('bench')?'bench':lifts[0];
-  const ser=histEx?liftSeries(histEx):[];const lastPt=ser[ser.length-1];
+  const ser=histEx?liftSeries(histEx):[];const lastPt=ser[ser.length-1];const asl=isAs(gx(histEx)?.k);
   const runs=SESS.filter(s=>s.mode==='run'&&s.rtype==='Test'&&parseT(s.log.test));
   const counts={gym:0,home:0,run:0,swim:0};const since=dayOff(-27);SESS.filter(s=>s.date>=since).forEach(s=>counts[s.mode]++);
   let h=`<header class="top"><div><div class="eyebrow">Your training</div><h1>History</h1></div>${syncTag()}</header>`;
@@ -537,8 +541,8 @@ function renderHistory(){
   h+=`<div class="panel"><div class="eyebrow">Last 4 weeks</div><div class="row num">${['gym','home','run','swim'].map(m=>`<span class="chip ${m}">${counts[m]} ${{gym:'gym',home:'home',run:'runs',swim:'swims'}[m]}</span>`).join('')}</div></div>`;
   if(lifts.length)h+=`<div class="panel gym"><div class="row" style="justify-content:space-between"><div class="eyebrow">Strength trend</div>
     <select id="histEx" data-f="histEx" style="padding:6px 8px" aria-label="Choose lift">${lifts.map(l=>`<option value="${l}" ${l===histEx?'selected':''}>${esc(gx(l)?.n||l)}</option>`).join('')}</select></div>
-    ${lastPt?`<div><span style="font-family:var(--f-display);font-size:32px;font-weight:700" class="num">${fw(Math.round(lastPt.v*2)/2)} kg</span> <span class="small muted">estimated 1-rep max · best set ${fw(lastPt.top.w)} × ${lastPt.top.r}</span></div>`:''}
-    ${chart(ser)}<p class="small muted">Estimated from your best set each session (weight × (1 + reps ÷ 30)).</p></div>`;
+    ${lastPt?`<div><span style="font-family:var(--f-display);font-size:32px;font-weight:700" class="num">${fw(Math.round(lastPt.v*2)/2)} kg</span> <span class="small muted">${asl?`assistance · best set ${fw(lastPt.top.w)} kg × ${lastPt.top.r}`:`estimated 1-rep max · best set ${fw(lastPt.top.w)} × ${lastPt.top.r}`}</span></div>`:''}
+    ${chart(ser,asl?'Assistance over time':undefined)}<p class="small muted">${asl?'The least assistance you used each session. Lower is better: the line going down means you are getting stronger.':'Estimated from your best set each session (weight × (1 + reps ÷ 30)).'}</p></div>`;
   if(runs.length)h+=`<div class="panel run"><div class="eyebrow">5K tests</div>${runs.map(r=>`<div class="row" style="justify-content:space-between"><span>${nice(r.date)}</span><b class="num">${esc(r.log.test)}</b></div>`).join('')}</div>`;
   h+=`<div class="hist">${SESS.map(s=>`<div class="hcard ${s.mode}"><div class="row"><span class="chip">${{gym:'Gym',home:'Home',run:'Run',swim:'Swim'}[s.mode]}</span><span class="small muted">${nice(s.date)}</span></div>
     <b>${esc(s.title)}</b><div class="small muted">${esc(summary(s))}</div>${s.notes?`<div class="small">“${esc(s.notes)}”</div>`:''}
@@ -548,14 +552,14 @@ function renderHistory(){
 /* ---------- plan ---------- */
 let resetArm=false;
 function renderPlan(){const p=paces(S.fiveK);const nd=ROT[S.q.strength];
-  return`<header class="top"><div><div class="eyebrow">Goal: get stronger · Mon, Tue, Thu, Fri</div><h1>Your plan</h1></div>${syncTag()}</header>
+  return`<header class="top"><div><div class="eyebrow">Goal: get stronger</div><h1>Your plan</h1></div>${syncTag()}</header>
   <div class="panel"><h2>How it works</h2>
    <p>Strength comes first. Gym and Home follow the same four-day rotation, so a home day still moves you forward. On the days you pick Run or Swim, the strength rotation simply waits.</p>
    <p>A good week for your goal: three strength days and one cardio day. Two cardio days is fine if you are enjoying it.</p>
    <p><b>Weights go up</b> when you hit the top of the rep range on every set. The app then adds the step shown below for the next session. Miss it, and you keep the weight and aim for one more rep.</p>
    <p><b>Bodyweight moves level up</b> the same way: hit the top of the range on every set and the next session gives you the harder variation.</p></div>
   <div class="panel gym"><h2>Strength rotation</h2><div class="tw"><table class="t"><tr><th>Day</th><th>Gym</th><th>Home</th></tr>
-   ${ROT.map(d=>`<tr class="${d===nd?'cur':''}"><td>${DAYNAME[d]}${d===nd?'<br><span class="small muted">next</span>':''}</td><td>${dayList('gym',d).map(id=>{const e=gx(id),L=S.lifts[id];return esc(e.n)+(e.k==='t'||e.k==='r'?'':` <span class="muted num">${fw(L?L.w:e.start)} kg</span>`)}).join('<br>')}</td>
+   ${ROT.map(d=>`<tr class="${d===nd?'cur':''}"><td>${DAYNAME[d]}${d===nd?'<br><span class="small muted">next</span>':''}</td><td>${dayList('gym',d).map(id=>{const e=gx(id),L=S.lifts[id];return esc(e.n)+(e.k==='t'||e.k==='r'?'':` <span class="muted num">${kgTxt(L?L.w:e.start,e.k)}</span>`)}).join('<br>')}</td>
    <td>${dayList('home',d).map(id=>{const x=hx(id);return esc(x.lv[homeLv(x,id)][0])}).join('<br>')}</td></tr>`).join('')}</table></div>
    <p class="small muted">Weight steps: +2.5 kg upper-body barbell, +5 kg lower-body barbell, +2 kg dumbbells, +5 kg most machines. Dumbbell weights are per hand.</p>
    <div class="row"><button class="btn" data-act="edit" data-v="days-gym">Edit gym days</button><button class="btn" data-act="edit" data-v="days-home">Edit home days</button><button class="btn" data-act="edit" data-v="exlist">My exercises</button></div></div>
@@ -588,7 +592,7 @@ function renderSheet(){const el=$('#sheet');if(!sheet){el.innerHTML='';return}
     h=`<div class="${m}" style="display:flex;flex-direction:column;gap:8px">${h}</div>`}
   else if(sheet.t==='swap'){const it=S.active.items[sheet.i];const base=gx(it.base);const opts=[it.base,...(base?.alts||[])].filter(id=>id!==it.ex&&gx(id));
     const rest=gymIds().filter(id=>id!==it.ex&&!opts.includes(id));
-    const opt=id=>{const x=gx(id);return`<button class="opt" data-act="doswap" data-id="${id}"><span><b>${esc(x.n)}</b></span><span class="small muted num">${x.k==='t'||x.k==='r'?'':fw(S.lifts[id]?.w??x.start)+' kg'}</span></button>`};
+    const opt=id=>{const x=gx(id);return`<button class="opt" data-act="doswap" data-id="${id}"><span><b>${esc(x.n)}</b></span><span class="small muted num">${x.k==='t'||x.k==='r'?'':kgTxt(S.lifts[id]?.w??x.start,x.k)}</span></button>`};
     h=`<h2>Swap ${esc(it.name)}</h2><p class="small muted">Machine taken or something doesn't feel right? Each option keeps its own weight history. This only changes today's session.</p>`+
       (opts.length?`<div class="eyebrow">Suggested</div>`+opts.map(opt).join(''):'')+`<div class="eyebrow">Any exercise</div>`+rest.map(opt).join('')}
   else if(sheet.t==='switch'){h=`<h2>Switch workout?</h2><p>This drops today's ${esc(S.active.title)} without saving. Your plan stays where it was, so it will be offered again next time.</p>
@@ -646,16 +650,17 @@ function renderEditor(){const e=ED;
     <p class="small muted">${DAYFOCUS[e.day]}. Sets, reps, rest${m==='gym'?' and weight step':''} apply everywhere an exercise is used.</p>
     ${ids.map((id,i)=>{const x=m==='gym'?gx(id):hx(id),p=`draft.exo.${id}`,o=e.draft.exo[id],timed=m==='gym'?x.k==='t':x.u==='sec',noW=m==='home'||x.k==='t'||x.k==='r';
       return`<section class="ex ${m}"><div class="ex-top"><div><div class="ex-name">${esc(exName(m,id))}</div>${isCustom(m,id)?'<div class="small muted">Custom exercise</div>':''}</div><div class="row" style="flex-wrap:nowrap">${mvBtns('draft.days.'+e.day,i,ids.length)}</div></div>
-      <div class="logs">${fld('Sets',p+'.s',o.s)}${fld(timed?'Min sec':'Min reps',p+'.lo',o.lo)}${fld(timed?'Max sec':'Max reps',p+'.hi',o.hi)}${fld('Rest (sec)',p+'.rest',o.rest)}${noW?'':fld('Step (kg)',p+'.inc',o.inc)}</div></section>`}).join('')||'<div class="empty">No exercises on this day yet. Add one below.</div>'}
+      <div class="logs">${fld('Sets',p+'.s',o.s)}${fld(timed?'Min sec':'Min reps',p+'.lo',o.lo)}${fld(timed?'Max sec':'Max reps',p+'.hi',o.hi)}${fld('Rest (sec)',p+'.rest',o.rest)}${noW?'':fld(isAs(x.k)?'Step (kg less assist)':'Step (kg)',p+'.inc',o.inc)}</div></section>`}).join('')||'<div class="empty">No exercises on this day yet. Add one below.</div>'}
     <div class="panel"><label class="eyebrow" for="addex">Add an exercise to ${DAYNAME[e.day]}</label>
      <select id="addex" data-add="1" style="padding:10px;font-size:16px"><option value="">Choose…</option>${all.map(id=>`<option value="${id}">${esc(exName(m,id))}${isCustom(m,id)?' (custom)':''}</option>`).join('')}</select>
      <div><button class="btn" data-act="e-newex" data-mode="${m}">Create a custom exercise</button></div></div>
     ${edFoot(`Restore default ${m} days`)}</div>`}
   if(e.t==='ex'){const m=e.mode,d=e.draft;
     const f=m==='gym'?`${fld('Name','draft.n',d.n,'s','full')}
-      ${sel('Type','draft.k',d.k,[['bb','Barbell'],['db','Dumbbell (kg per hand)'],['mc','Machine or cable'],['t','Timed hold'],['r','Reps only (bodyweight)']],'full')}
+      ${sel('Type','draft.k',d.k,[['bb','Barbell'],['db','Dumbbell (kg per hand)'],['mc','Machine or cable'],['as','Assisted machine (kg of help)'],['t','Timed hold'],['r','Reps only (bodyweight)']],'full')}
       ${fld('Sets','draft.s',d.s)}${fld(d.k==='t'?'Min sec':'Min reps','draft.lo',d.lo)}${fld(d.k==='t'?'Max sec':'Max reps','draft.hi',d.hi)}${fld('Rest (sec)','draft.rest',d.rest)}
-      ${d.k==='t'||d.k==='r'?'':fld('Step (kg)','draft.inc',d.inc)+fld('Start (kg)','draft.start',d.start)}`
+      ${d.k==='t'||d.k==='r'?'':fld(isAs(d.k)?'Step (kg less assist)':'Step (kg)','draft.inc',d.inc)+fld(isAs(d.k)?'Start assist (kg)':'Start (kg)','draft.start',d.start)}
+      ${isAs(d.k)?'<p class="small muted full">Enter how much the machine helps you. Hit the top of the rep range on every set and the next session uses the step less assistance.</p>':''}`
      :`<label class="full">Variations, one per line, easiest first<textarea data-e="draft.lvText" rows="4" placeholder="Wall push-up&#10;Incline push-up&#10;Push-up">${esc(d.lvText)}</textarea></label>
       ${sel('Counts','draft.u',d.u,[['reps','Reps'],['sec','Seconds']],'full')}
       ${fld('Sets','draft.s',d.s)}${fld(d.u==='sec'?'Min sec':'Min reps','draft.lo',d.lo)}${fld(d.u==='sec'?'Max sec':'Max reps','draft.hi',d.hi)}${fld('Rest (sec)','draft.rest',d.rest)}`;
