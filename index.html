@@ -93,6 +93,16 @@ header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:1
 .swim .btn.primary{color:var(--on-swim)}
 .btn.danger{color:var(--gym);border-color:var(--gym)}
 .btn.block{width:100%}
+.btn.sm{padding:6px 10px;min-width:36px}
+.btn:disabled{opacity:.35}
+.ed .btn.primary{background:var(--ink);color:var(--bg)}
+.logs select{padding:8px;width:100%;font-size:16px}
+.logs .full{grid-column:1/-1}
+.logs textarea{font-size:16px}
+.seg{gap:6px}
+.edrow{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px}
+.edrow.cur{box-shadow:inset 4px 0 0 var(--c)}
+.edrow>span{min-width:0}
 label.btn{cursor:pointer;display:inline-block}
 
 .ex{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
@@ -252,21 +262,29 @@ const HOME={
 };
 const HOMEDAY={UA:['push','row','pike','tri','plank_l'],LA:['squat','hinge','calf_h','side_plank'],UB:['pike','row','push','back2','plank_l'],LB:['lunge','sl_rdl','calf_h','dead_bug']};
 
-// Runs: speeds come from your 5K time. W walk, R walking recovery, E easy, L long, T tempo, I interval, F 5K pace
+// Runs: speeds come from your 5K time. Zones: W walk, R walking recovery, E easy, L long, T tempo, I interval, F 5K pace.
+// Block kinds: time (min), reps (n × km or sec, rec = recovery seconds), dist (km).
+const T_=(l,min,z,note)=>({l,k:'time',min,z,note});
+const R_=(l,n,km,sec,rec,recT,z,note)=>({l,k:'reps',n,km,sec,rec,recT,z,note});
+const D_=(l,km,z,note)=>({l,k:'dist',km,z,note});
+const WU1=T_('Warm-up',5,'W','brisk walk'),WU2=T_('Warm-up',8,'E','5 min walk, then 3 min easy jog'),WU3=T_('Warm-up',10,'E','5 min walk, then 5 min easy jog');
+const CD3=T_('Cool-down',3,'R','walk'),CD5=T_('Cool-down',5,'R','walk');
 const RUN=[
- {t:'Easy',n:'Easy run, 20 min',b:p=>[['Warm-up','5 min brisk walk','W',5],['Run','20 min steady. You can talk in full sentences.','E',20],['Cool-down','3 min walk','R',3]]},
- {t:'Intervals',n:'6 × 400 m',b:p=>[['Warm-up','5 min walk, 3 min easy jog','E',8],['Repeats',`6 × 400 m (about ${pt(.4,p.I)} each), 90 s walk between`,'I',6*(.4/p.I*60+1.5)],['Cool-down','5 min walk','R',5]]},
- {t:'Easy',n:'Easy run, 25 min',b:p=>[['Warm-up','5 min brisk walk','W',5],['Run','25 min steady','E',25],['Cool-down','3 min walk','R',3]]},
- {t:'Tempo',n:'Tempo 2 × 8 min',b:p=>[['Warm-up','5 min walk, 5 min easy jog','E',10],['Tempo','2 × 8 min comfortably hard, 2 min easy jog between','T',18],['Cool-down','5 min walk','R',5]]},
- {t:'Long',n:'Long easy run, 30 min',b:p=>[['Warm-up','5 min brisk walk','W',5],['Run','30 min relaxed. Slower than you think.','L',30],['Cool-down','5 min walk','R',5]]},
- {t:'Intervals',n:'8 × 400 m',b:p=>[['Warm-up','5 min walk, 3 min easy jog','E',8],['Repeats',`8 × 400 m (about ${pt(.4,p.I)} each), 90 s walk between`,'I',8*(.4/p.I*60+1.5)],['Cool-down','5 min walk','R',5]]},
- {t:'Easy',n:'Easy 25 min + strides',b:p=>[['Warm-up','5 min brisk walk','W',5],['Run','25 min steady','E',25],['Strides',`4 × 20 s quick and relaxed at ${f1(p.I)} km/h, 60 s walk between`,'I',5.5],['Cool-down','3 min walk','R',3]]},
- {t:'Tempo',n:'Tempo 2 × 10 min',b:p=>[['Warm-up','5 min walk, 5 min easy jog','E',10],['Tempo','2 × 10 min comfortably hard, 2 min easy jog between','T',22],['Cool-down','5 min walk','R',5]]},
- {t:'Intervals',n:'5 × 800 m',b:p=>[['Warm-up','5 min walk, 5 min easy jog','E',10],['Repeats',`5 × 800 m (about ${pt(.8,p.I)} each), 2 min walk between`,'I',5*(.8/p.I*60+2)],['Cool-down','5 min walk','R',5]]},
- {t:'Long',n:'Long easy run, 35 min',b:p=>[['Warm-up','5 min brisk walk','W',5],['Run','35 min relaxed','L',35],['Cool-down','5 min walk','R',5]]},
- {t:'Tempo',n:'Tempo 20 min',b:p=>[['Warm-up','5 min walk, 5 min easy jog','E',10],['Tempo','20 min continuous, comfortably hard','T',20],['Cool-down','5 min walk','R',5]]},
- {t:'Test',n:'5K time trial',b:p=>[['Warm-up','5 min walk, 5 min easy jog, 2 short pickups','E',10],['5K',`Start at your current 5K speed. Speed up for the last kilometre if you can. Log your time below.`,'F',5/p.F*60],['Cool-down','5 min walk','R',5]]},
+ {t:'Easy',n:'Easy run, 20 min',b:[WU1,T_('Run',20,'E','steady. You can talk in full sentences.'),CD3]},
+ {t:'Intervals',n:'6 × 400 m',b:[WU2,R_('Repeats',6,.4,0,90,'walk','I',''),CD5]},
+ {t:'Easy',n:'Easy run, 25 min',b:[WU1,T_('Run',25,'E','steady'),CD3]},
+ {t:'Tempo',n:'Tempo 2 × 8 min',b:[WU3,R_('Tempo',2,0,480,120,'easy jog','T','comfortably hard'),CD5]},
+ {t:'Long',n:'Long easy run, 30 min',b:[WU1,T_('Run',30,'L','relaxed. Slower than you think.'),CD5]},
+ {t:'Intervals',n:'8 × 400 m',b:[WU2,R_('Repeats',8,.4,0,90,'walk','I',''),CD5]},
+ {t:'Easy',n:'Easy 25 min + strides',b:[WU1,T_('Run',25,'E','steady'),R_('Strides',4,0,20,60,'walk','I','quick and relaxed'),CD3]},
+ {t:'Tempo',n:'Tempo 2 × 10 min',b:[WU3,R_('Tempo',2,0,600,120,'easy jog','T','comfortably hard'),CD5]},
+ {t:'Intervals',n:'5 × 800 m',b:[WU3,R_('Repeats',5,.8,0,120,'walk','I',''),CD5]},
+ {t:'Long',n:'Long easy run, 35 min',b:[WU1,T_('Run',35,'L','relaxed'),CD5]},
+ {t:'Tempo',n:'Tempo 20 min',b:[WU3,T_('Tempo',20,'T','continuous, comfortably hard'),CD5]},
+ {t:'Test',n:'5K time trial',b:[T_('Warm-up',10,'E','5 min walk, 5 min easy jog, 2 short pickups'),D_('5K',5,'F','Start at your current 5K speed. Speed up for the last kilometre if you can. Log your time below.'),CD5]},
 ];
+const ZONE={W:'Walk',R:'Recovery walk',E:'Easy',L:'Long run',T:'Tempo',I:'Interval',F:'5K pace'};
+const RUN_TYPES=['Easy','Intervals','Tempo','Long','Test'],SWIM_TYPES=['Technique','Endurance','Speed','Test'];
 // Swim: 50 m pool. on = send-off seconds (leave the wall every X), rest = seconds rest
 const SWIM=[
  {t:'Technique',n:'Catch-up drill',b:[['Warm-up',1,100,'easy, any stroke'],['Kick',2,50,'kick with a board',{rest:60}],['Drill',4,50,'catch-up freestyle (one hand waits in front until the other arrives)',{rest:60}],['Main',4,50,'freestyle',{on:180}],['Cool-down',1,50,'easy backstroke or breaststroke']]},
@@ -279,7 +297,7 @@ const SWIM=[
  {t:'Endurance',n:'4 × 100',b:[['Warm-up',1,100,'easy, any stroke'],['Main',4,100,'freestyle',{rest:75}],['Then',2,50,'freestyle',{on:150}],['Cool-down',1,50,'easy']]},
  {t:'Speed',n:'Odd fast, even easy',b:[['Warm-up',1,100,'easy, any stroke'],['Kick',2,50,'kick with a board',{rest:60}],['Main',8,50,'odd lengths fast, even lengths easy',{on:165}],['Then',2,100,'easy freestyle',{rest:60}],['Cool-down',1,50,'easy']]},
  {t:'Test',n:'400 m test',b:[['Warm-up',1,100,'easy, any stroke'],['Warm-up',2,50,'easy freestyle',{rest:45}],['Test',1,400,'freestyle, as continuous as you can. Short wall stops are allowed. Log your time below.'],['Cool-down',1,100,'easy']]},
-];
+].map(w=>({t:w.t,n:w.n,b:w.b.map(([l,n,d,txt,o])=>({l,n,d,txt,on:o?.on||0,rest:o?.rest||0}))}));
 
 /* ===================== HELPERS ===================== */
 const $=s=>document.querySelector(s);
@@ -297,16 +315,37 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 const e1rm=(w,r)=>r>0?w*(1+r/30):0;
 function paces(fiveK){const v=5/(fiveK/3600);return{W:5.5,R:5.0,E:+f1(v*.82),L:+f1(v*.8),T:+f1(v*.94),I:+f1(v*1.06),F:+f1(v)}}
 function plates(w){if(w<20)return null;let per=(w-20)/2;if(per<=0)return'Empty bar (20 kg)';const out=[];for(const p of[25,20,15,10,5,2.5,1.25]){while(per>=p-1e-9){out.push(p);per-=p}}return'Per side: '+(out.length?out.map(fw).join(' + '):'nothing')+(per>.01?' (closest)':'')}
-function swimLine(b,cyc){const[,n,d,txt,o]=b;let s=(n>1?`${n} × ${d} m `:`${d} m `)+txt;if(o?.on){const on=Math.max(105,o.on-15*(cyc-1));s+=` · leave every ${mmss(on)}`}if(o?.rest)s+=` · ${o.rest} s rest`;return s}
-const swimDist=sw=>sw.b.reduce((a,b)=>a+b[1]*b[2],0);
+function swimLine(b,cyc){let s=(b.n>1?`${b.n} × ${b.d} m `:`${b.d} m `)+(b.txt||'');if(b.on){const on=Math.max(Math.min(105,b.on),b.on-15*(cyc-1));s+=` · leave every ${mmss(on)}`}else if(b.rest)s+=` · ${b.rest} s rest`;return s}
+const swimDist=sw=>sw.b.reduce((a,b)=>a+(+b.n||0)*(+b.d||0),0);
+const repMin=(b,p)=>b.km?b.km/p[b.z]*60:(b.sec||0)/60;
+function blockMin(b,p){if(b.k==='reps')return(b.n||1)*(repMin(b,p)+(b.rec||0)/60);if(b.k==='dist')return(b.km||0)/p[b.z]*60;return+b.min||0}
+function blockText(b,p){let s;
+  if(b.k==='reps'){s=`${b.n} × `+(b.km?`${fw(b.km*1000)} m (about ${pt(b.km,p[b.z])} each)`:mmss(b.sec||0));if(b.note)s+=' '+b.note;if(b.rec)s+=`, ${mmss(b.rec)} ${b.recT||'walk'} between`}
+  else if(b.k==='dist')s=`${fw(b.km)} km`+(b.note?'. '+b.note:'');
+  else s=`${fw(+b.min||0)} min`+(b.note?' · '+b.note:'');
+  return s}
+const runMin=(r,p)=>r.b.reduce((a,b)=>a+blockMin(b,p),0);
 
 /* ===================== STATE + STORAGE ===================== */
-function defState(){return{v:1,q:{strength:0,run:0,swim:0},runCycle:1,swimCycle:1,fiveK:1800,swim400:null,lifts:{},levels:{},active:null}}
+function defState(){return{v:1,q:{strength:0,run:0,swim:0},runCycle:1,swimCycle:1,fiveK:1800,swim400:null,lifts:{},levels:{},active:null,plan:{}}}
 let S=defState(),SESS=[],view='today',sheet=null;
 const LS_S='mp_state',LS_H='mp_sess';
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 (function(){const s=lsGet(LS_S);if(s)S=Object.assign(defState(),s);const h=lsGet(LS_H);if(Array.isArray(h))SESS=h})();
+
+/* ===================== EFFECTIVE PLAN (defaults + your edits in S.plan) ===================== */
+const P=()=>S.plan||(S.plan={});
+const gx=id=>{const b=P().gymEx?.[id]||GYM[id];return b?Object.assign({alts:[]},b,P().exo?.gym?.[id]):null};
+const hx=id=>{const b=P().homeEx?.[id]||HOME[id];return b?Object.assign({},b,P().exo?.home?.[id]):null};
+const gymIds=()=>[...Object.keys(GYM),...Object.keys(P().gymEx||{})];
+const homeIds=()=>[...Object.keys(HOME),...Object.keys(P().homeEx||{})];
+const dayList=(mode,d)=>((mode==='gym'?P().gymDay:P().homeDay)?.[d]||(mode==='gym'?GYMDAY:HOMEDAY)[d]).filter(id=>mode==='gym'?gx(id):hx(id));
+const runPlan=()=>P().run||RUN;
+const swimPlan=()=>P().swim||SWIM;
+const homeLv=(h,id)=>Math.min(S.levels[id]??h.start??0,h.lv.length-1);
+function clampQ(){if(S.q.run>=runPlan().length)S.q.run=0;if(S.q.swim>=swimPlan().length)S.q.swim=0}
+clampQ();
 
 function save(){lsSet(LS_S,S)}
 function saveSession(s){SESS=SESS.filter(x=>x.id!==s.id);SESS.unshift(s);SESS.sort((a,b)=>b.ts-a.ts);lsSet(LS_H,SESS)}
@@ -326,38 +365,38 @@ async function importData(file){try{const d=JSON.parse(await file.text());
   catch(e){toast('That file is not a Morning Pick backup.')}}
 
 /* ===================== BUILDING SESSIONS ===================== */
-function gymItem(id,base){const e=GYM[id],L=S.lifts[id];const w=L?L.w:e.start;
+function gymItem(id,base){const e=gx(id),L=S.lifts[id];const w=L?L.w:e.start;
   const prev=L?.last||[];
   return{ex:id,base:base||id,name:e.n,k:e.k,lo:e.lo,hi:e.hi,rest:e.rest,up:!!L?.up,first:!L,
     sets:Array.from({length:e.s},(_,i)=>({w,r:prev[i]?.r??(e.k==='t'?e.lo:e.lo),done:false}))}}
-function homeItem(id){const h=HOME[id];const lv=S.levels[id]??h.start;const L=S.lifts['h_'+id];
+function homeItem(id){const h=hx(id);const lv=homeLv(h,id);const L=S.lifts['h_'+id];
   return{ex:id,base:id,home:true,level:lv,u:h.u,lo:h.lo,hi:h.hi,rest:h.rest,up:!!L?.up,
     sets:Array.from({length:h.s},(_,i)=>({r:(L&&L.level===lv&&L.last?.[i]?.r)||h.lo,done:false}))}}
-function buildStrength(mode,day){const items=mode==='gym'?GYMDAY[day].map(id=>gymItem(id)):HOMEDAY[day].map(homeItem);
+function buildStrength(mode,day){const items=mode==='gym'?dayList('gym',day).map(id=>gymItem(id)):dayList('home',day).map(homeItem);
   return{id:uid(),date:today(),ts:Date.now(),mode,day,title:DAYNAME[day]+' · '+DAYFOCUS[day],short:false,items,notes:''}}
-function buildRun(i){const r=RUN[i];return{id:uid(),date:today(),ts:Date.now(),mode:'run',idx:i,cycle:S.runCycle,rtype:r.t,title:r.n,
+function buildRun(i){const r=runPlan()[i];return{id:uid(),date:today(),ts:Date.now(),mode:'run',idx:i,cycle:S.runCycle,rtype:r.t,title:r.n,b:clone(r.b),
   speeds:paces(S.fiveK),log:{min:'',km:'',rpe:'',test:''},notes:''}}
-function buildSwim(i){const w=SWIM[i];return{id:uid(),date:today(),ts:Date.now(),mode:'swim',idx:i,cycle:S.swimCycle,stype:w.t,title:w.n,
+function buildSwim(i){const w=swimPlan()[i];return{id:uid(),date:today(),ts:Date.now(),mode:'swim',idx:i,cycle:S.swimCycle,stype:w.t,title:w.n,b:clone(w.b),dist:swimDist(w),
   checks:w.b.map(()=>false),log:{min:'',rpe:'',test:''},notes:''}}
-function estMin(mode,key){if(mode==='gym')return GYMDAY[key].length*11;if(mode==='home')return HOMEDAY[key].length*8+5;
-  if(mode==='run')return Math.round(RUN[key].b(paces(S.fiveK)).reduce((a,b)=>a+b[3],0));return Math.round(swimDist(SWIM[key])/50*2.6)+5}
+function estMin(mode,key){if(mode==='gym')return dayList('gym',key).length*11;if(mode==='home')return dayList('home',key).length*8+5;
+  if(mode==='run')return Math.round(runMin(runPlan()[key],paces(S.fiveK)));return Math.round(swimDist(swimPlan()[key])/50*2.6)+5}
 
 /* ===================== FINISHING + PROGRESSION ===================== */
 function finish(){const s=S.active;if(!s)return;let msg='Saved.';
   if(s.mode==='gym'||s.mode==='home'){
     for(const it of s.items){const done=it.sets.filter(x=>x.done);if(!done.length)continue;
       const hitTop=done.length>=it.sets.length&&done.every(x=>+x.r>=it.hi);
-      if(it.home){const h=HOME[it.ex];const nl=hitTop?Math.min(it.level+1,h.lv.length-1):it.level;
+      if(it.home){const h=hx(it.ex);if(!h)continue;const nl=hitTop?Math.min(it.level+1,h.lv.length-1):it.level;
         S.levels[it.ex]=nl;S.lifts['h_'+it.ex]={level:it.level,up:nl>it.level,last:done.map(x=>({r:+x.r})),date:s.date}}
-      else{const e=GYM[it.ex];const w=+done[0].w||0;const nw=(hitTop&&e.inc)?w+e.inc:w;
+      else{const e=gx(it.ex)||{inc:0};const w=+done[0].w||0;const nw=(hitTop&&e.inc)?w+e.inc:w;
         S.lifts[it.ex]={w:nw,up:nw>w,last:done.map(x=>({w:+x.w,r:+x.r})),date:s.date}}}
     S.q.strength=(ROT.indexOf(s.day)+1)%4;msg=`Saved. Next strength day: ${DAYNAME[ROT[S.q.strength]]}.`}
   else if(s.mode==='run'){const t=parseT(s.log.test);
-    if(RUN[s.idx].t==='Test'){if(t&&t>600){S.fiveK=t;msg=`Saved. New 5K time ${mmss(t)}: run speeds updated.`}S.q.run=0;S.runCycle++}
-    else S.q.run=(s.idx+1)%RUN.length}
+    if(s.rtype==='Test'){if(t&&t>600){S.fiveK=t;msg=`Saved. New 5K time ${mmss(t)}: run speeds updated.`}S.q.run=0;S.runCycle++}
+    else S.q.run=(s.idx+1)%runPlan().length}
   else{const t=parseT(s.log.test);
-    if(SWIM[s.idx].t==='Test'){if(t)S.swim400=t;S.q.swim=0;S.swimCycle++;msg='Saved. Swim cycle '+S.swimCycle+' starts with send-offs 15 s faster.'}
-    else S.q.swim=(s.idx+1)%SWIM.length}
+    if(s.stype==='Test'){if(t)S.swim400=t;S.q.swim=0;S.swimCycle++;msg='Saved. Swim cycle '+S.swimCycle+' starts with send-offs 15 s faster.'}
+    else S.q.swim=(s.idx+1)%swimPlan().length}
   s.done=true;s.ts=Date.now();saveSession(clone(s));S.active=null;save();stopTimer();releaseWake();view='today';sheet=null;render();toast(msg)}
 
 /* ===================== GUARDRAILS ===================== */
@@ -365,16 +404,17 @@ function prevDay(){const y=dayOff(-1);return SESS.find(s=>s.date===y)}
 const isLegs=s=>s&&(s.mode==='gym'||s.mode==='home')&&(s.day==='LA'||s.day==='LB');
 const isHardRun=s=>s&&s.mode==='run'&&['Intervals','Tempo','Test'].includes(s.rtype);
 function warnFor(mode){const p=prevDay();if(!p)return'';
-  if(mode==='run'&&isLegs(p)&&['Intervals','Tempo','Test'].includes(RUN[S.q.run].t))return'You trained legs yesterday. Consider picking an easy run instead.';
+  if(mode==='run'&&isLegs(p)&&['Intervals','Tempo','Test'].includes(runPlan()[S.q.run].t))return'You trained legs yesterday. Consider picking an easy run instead.';
   if((mode==='gym'||mode==='home')&&isHardRun(p)&&['LA','LB'].includes(ROT[S.q.strength]))return'Hard run yesterday. Start the lower-body lifts a little lighter if your legs feel heavy.';
   return''}
 
 /* ===================== RENDER ===================== */
 function render(){
-  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===view));
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===(view==='edit'?'plan':view)));
   const a=$('#app');
   if(view==='today')a.innerHTML=S.active?renderActive():renderToday();
   else if(view==='history')a.innerHTML=renderHistory();
+  else if(view==='edit'&&ED)a.innerHTML=renderEditor();
   else a.innerHTML=renderPlan();
   renderSheet();renderTimer();
 }
@@ -394,10 +434,10 @@ function renderToday(){
   ${backupDue()?`<div class="note">It's been a while since your last backup. <button class="link" style="color:inherit" data-act="export">Export one now</button> so a new phone or cleared browser doesn't lose your history.</div>`:''}
   ${done.length?`<div class="note">Already logged today: ${done.map(s=>esc(s.title)).join(', ')}.</div>`:''}
   <div class="picker">
-   ${card('gym','Gym','Weights',DAYNAME[nd]+' · '+DAYFOCUS[nd],`${GYMDAY[nd].length} exercises · about ${estMin('gym',nd)} min`,warnFor('gym'))}
-   ${card('home','Home','No equipment',DAYNAME[nd]+' · bodyweight',`${HOMEDAY[nd].length} exercises · about ${estMin('home',nd)} min`,warnFor('home'))}
-   ${card('run','Run','Treadmill',RUN[ri].n,`${RUN[ri].t} · about ${estMin('run',ri)} min · session ${ri+1} of ${RUN.length}`,warnFor('run'))}
-   ${card('swim','Swim','50 m pool',SWIM[si].n,`${SWIM[si].t} · ${swimDist(SWIM[si])} m · session ${si+1} of ${SWIM.length}`,'')}
+   ${card('gym','Gym','Weights',DAYNAME[nd]+' · '+DAYFOCUS[nd],`${dayList('gym',nd).length} exercises · about ${estMin('gym',nd)} min`,warnFor('gym'))}
+   ${card('home','Home','No equipment',DAYNAME[nd]+' · bodyweight',`${dayList('home',nd).length} exercises · about ${estMin('home',nd)} min`,warnFor('home'))}
+   ${card('run','Run','Treadmill',runPlan()[ri].n,`${runPlan()[ri].t} · about ${estMin('run',ri)} min · session ${ri+1} of ${runPlan().length}`,warnFor('run'))}
+   ${card('swim','Swim','50 m pool',swimPlan()[si].n,`${swimPlan()[si].t} · ${swimDist(swimPlan()[si])} m · session ${si+1} of ${swimPlan().length}`,'')}
   </div>
   <p class="small muted">Gym and Home share one strength rotation (Upper A → Lower A → Upper B → Lower B), so either one moves you forward. Nothing advances until you tap Finish.</p>
   ${last?`<div class="panel"><div class="eyebrow">Last session</div><div><b>${esc(last.title)}</b> <span class="muted">· ${nice(last.date)}</span></div><div class="small muted">${esc(summary(last))}</div></div>`:''}`;
@@ -416,13 +456,13 @@ function renderActive(){const s=S.active;const isStr=s.mode==='gym'||s.mode==='h
    <button class="btn primary block" data-act="finish">Finish and save${isStr?` · ${doneSets} sets done`:''}</button></div>`;
   return h}
 
-function gymCard(it,i){const e=GYM[it.ex];const timed=it.k==='t',ro=it.k==='r';const L=S.lifts[it.ex];
+function gymCard(it,i){const e=gx(it.ex)||{alts:[],cue:'',inc:0};const timed=it.k==='t',ro=it.k==='r';const L=S.lifts[it.ex];
   const unit=it.k==='db'?'kg each':'kg';
   const last=L?.last?`Last time (${nice(L.date)}): <b class="num">${L.last.map(x=>timed?x.r+' s':ro?x.r:fw(x.w)+'×'+x.r).join(', ')}</b>`:'';
   const pl=it.k==='bb'?plates(+it.sets[0].w):null;
   return`<section class="ex gym"><div class="ex-top"><div><div class="ex-name">${esc(it.name)}</div>
-   <div class="target">${it.sets.length} × ${it.lo}–${it.hi}${timed?' s':' reps'} · ${it.rest>=120?Math.round(it.rest/60*10)/10+' min':it.rest+' s'} rest</div></div>
-   ${e.alts?`<button class="btn" data-act="swap" data-i="${i}">Swap</button>`:''}</div>
+   <div class="target">${it.sets.length} × ${it.lo}–${it.hi}${timed?' s':' reps'} · ${it.rest>=120?(it.rest%30?mmss(it.rest):it.rest/60)+' min':it.rest+' s'} rest</div></div>
+   <button class="btn" data-act="swap" data-i="${i}">Swap</button></div>
    ${it.up?`<div><span class="badge">+${fw(e.inc)} kg: you hit the top of the range last time</span></div>`:''}
    ${it.first&&!timed&&!ro?`<p class="cue">First time: the weight is a starting guess. Pick a load you could lift 2–3 more reps with, and adjust it here.</p>`:''}
    ${last?`<div class="lastline">${last}</div>`:''}
@@ -434,7 +474,7 @@ function gymCard(it,i){const e=GYM[it.ex];const timed=it.k==='t',ro=it.k==='r';c
    ${pl?`<div class="plates num">${pl}</div>`:''}
    <div class="links"><button class="link" data-act="addset" data-i="${i}">Add set</button>${it.sets.length>1?`<button class="link" data-act="delset" data-i="${i}">Remove last set</button>`:''}</div></section>`}
 
-function homeCard(it,i){const h=HOME[it.ex],[nm,cue]=h.lv[it.level];const L=S.lifts['h_'+it.ex];const sec=it.u==='sec';
+function homeCard(it,i){const h=hx(it.ex)||{lv:[[it.name||it.ex,'']]};it.level=Math.min(it.level,h.lv.length-1);const[nm,cue]=h.lv[it.level];const L=S.lifts['h_'+it.ex];const sec=it.u==='sec';
   return`<section class="ex home"><div class="ex-top"><div><div class="ex-name">${esc(nm)}</div>
    <div class="target">${it.sets.length} × ${it.lo}–${it.hi}${sec?' s':' reps'} · ${it.rest} s rest</div></div></div>
    <div class="lvl"><button data-act="lvl" data-i="${i}" data-d="-1" ${it.level===0?'disabled':''} aria-label="Easier variation">‹</button>
@@ -448,29 +488,29 @@ function homeCard(it,i){const h=HOME[it.ex],[nm,cue]=h.lv[it.level];const L=S.li
      <button class="tick" data-act="tick" data-i="${i}" data-j="${j}" aria-label="Mark set ${j+1} done">✓</button></div>`).join('')}</div>
    <div class="links"><button class="link" data-act="addset" data-i="${i}">Add set</button>${it.sets.length>1?`<button class="link" data-act="delset" data-i="${i}">Remove last set</button>`:''}</div></section>`}
 
-function runCard(s){const r=RUN[s.idx],p=s.speeds;const bl=r.b(p);const test=r.t==='Test';
+function runCard(s){const p=s.speeds;const bl=s.b||runPlan()[s.idx%runPlan().length].b;const test=s.rtype==='Test';
   return`<section class="ex run"><div class="eyebrow">Incline 1% · speeds from your 5K time of ${mmss(S.fiveK)}</div>
-   <div>${bl.map(b=>`<div class="block"><div><div class="lbl">${b[0]}</div><div>${esc(b[1])}</div></div>
-     <div class="speed num">${f1(p[b[2]])}<small>km/h · ${mmss(60/p[b[2]]*60)}/km</small></div></div>`).join('')}</div></section>
+   <div>${bl.map(b=>`<div class="block"><div><div class="lbl">${esc(b.l)}</div><div>${esc(blockText(b,p))}</div></div>
+     <div class="speed num">${f1(p[b.z])}<small>km/h · ${mmss(60/p[b.z]*60)}/km</small></div></div>`).join('')}</div></section>
    <section class="ex run"><div class="eyebrow">Log it</div><div class="logs">
     <label for="lmin">Total minutes<input id="lmin" inputmode="decimal" data-f="log.min" value="${esc(s.log.min)}"></label>
     <label for="lkm">Distance (km)<input id="lkm" inputmode="decimal" data-f="log.km" value="${esc(s.log.km)}"></label>
     <label for="lrpe">Effort 1–10<input id="lrpe" inputmode="numeric" data-f="log.rpe" value="${esc(s.log.rpe)}"></label></div>
     ${test?`<label class="small muted" for="ltest">5K time (mm:ss). This resets your run speeds for the next cycle.</label><input id="ltest" style="padding:10px;font-size:18px" placeholder="29:15" data-f="log.test" value="${esc(s.log.test)}">`:''}</section>`}
 
-function swimCard(s){const w=SWIM[s.idx];const test=w.t==='Test';
+function swimCard(s){const w={b:s.b||swimPlan()[s.idx%swimPlan().length].b};const test=s.stype==='Test';
   return`<section class="ex swim"><div class="eyebrow">${swimDist(w)} m total · ${swimDist(w)/50} lengths</div>
-   <div>${w.b.map((b,k)=>`<div class="block"><div><div class="lbl">${b[0]}</div><div>${esc(swimLine(b,s.cycle))}</div></div>
-     <button class="chk ${s.checks[k]?'on':''}" data-act="chk" data-k="${k}" aria-label="Mark ${b[0]} done">✓</button></div>`).join('')}</div></section>
+   <div>${w.b.map((b,k)=>`<div class="block"><div><div class="lbl">${esc(b.l)}</div><div>${esc(swimLine(b,s.cycle))}</div></div>
+     <button class="chk ${s.checks[k]?'on':''}" data-act="chk" data-k="${k}" aria-label="Mark ${esc(b.l)} done">✓</button></div>`).join('')}</div></section>
    <section class="ex swim"><div class="eyebrow">Log it</div><div class="logs">
     <label for="smin">Total minutes<input id="smin" inputmode="decimal" data-f="log.min" value="${esc(s.log.min)}"></label>
     <label for="srpe">Effort 1–10<input id="srpe" inputmode="numeric" data-f="log.rpe" value="${esc(s.log.rpe)}"></label>
     ${test?`<label for="stest">400 m time<input id="stest" placeholder="14:30" data-f="log.test" value="${esc(s.log.test)}"></label>`:''}</div></section>`}
 
 function summary(s){if(s.items){const it=s.items.filter(i=>i.sets.some(x=>x.done));
-  return it.slice(0,3).map(i=>{const d=i.sets.filter(x=>x.done);const nm=i.home?HOME[i.ex].lv[i.level][0]:i.name;
+  return it.slice(0,3).map(i=>{const d=i.sets.filter(x=>x.done);const nm=i.home?(hx(i.ex)?.lv[i.level]?.[0]||i.name||i.ex):i.name;
     return nm+' '+(i.home||i.k==='t'||i.k==='r'?d.map(x=>x.r).join('/'):fw(Math.max(...d.map(x=>+x.w)))+' kg × '+d.map(x=>x.r).join('/'))}).join(' · ')+(it.length>3?` · +${it.length-3} more`:'')||'No sets ticked'}
-  const l=s.log||{};const bits=[];if(l.min)bits.push(l.min+' min');if(l.km)bits.push(l.km+' km');if(s.mode==='swim')bits.push(swimDist(SWIM[s.idx])+' m planned');if(l.test)bits.push('test '+l.test);if(l.rpe)bits.push('effort '+l.rpe+'/10');return bits.join(' · ')||'Logged'}
+  const l=s.log||{};const bits=[];if(l.min)bits.push(l.min+' min');if(l.km)bits.push(l.km+' km');if(s.mode==='swim'&&(s.dist??swimPlan()[s.idx]))bits.push((s.dist??swimDist(swimPlan()[s.idx]))+' m planned');if(l.test)bits.push('test '+l.test);if(l.rpe)bits.push('effort '+l.rpe+'/10');return bits.join(' · ')||'Logged'}
 
 /* ---------- history ---------- */
 let histEx=null,delArm=null;
@@ -496,7 +536,7 @@ function renderHistory(){
   if(!SESS.length)return h+`<div class="empty"><h3>No sessions yet</h3><p>Finish your first workout on the Today tab and it shows up here, with a strength chart for every lift.</p></div>`;
   h+=`<div class="panel"><div class="eyebrow">Last 4 weeks</div><div class="row num">${['gym','home','run','swim'].map(m=>`<span class="chip ${m}">${counts[m]} ${{gym:'gym',home:'home',run:'runs',swim:'swims'}[m]}</span>`).join('')}</div></div>`;
   if(lifts.length)h+=`<div class="panel gym"><div class="row" style="justify-content:space-between"><div class="eyebrow">Strength trend</div>
-    <select id="histEx" data-f="histEx" style="padding:6px 8px" aria-label="Choose lift">${lifts.map(l=>`<option value="${l}" ${l===histEx?'selected':''}>${esc(GYM[l].n)}</option>`).join('')}</select></div>
+    <select id="histEx" data-f="histEx" style="padding:6px 8px" aria-label="Choose lift">${lifts.map(l=>`<option value="${l}" ${l===histEx?'selected':''}>${esc(gx(l)?.n||l)}</option>`).join('')}</select></div>
     ${lastPt?`<div><span style="font-family:var(--f-display);font-size:32px;font-weight:700" class="num">${fw(Math.round(lastPt.v*2)/2)} kg</span> <span class="small muted">estimated 1-rep max · best set ${fw(lastPt.top.w)} × ${lastPt.top.r}</span></div>`:''}
     ${chart(ser)}<p class="small muted">Estimated from your best set each session (weight × (1 + reps ÷ 30)).</p></div>`;
   if(runs.length)h+=`<div class="panel run"><div class="eyebrow">5K tests</div>${runs.map(r=>`<div class="row" style="justify-content:space-between"><span>${nice(r.date)}</span><b class="num">${esc(r.log.test)}</b></div>`).join('')}</div>`;
@@ -515,24 +555,27 @@ function renderPlan(){const p=paces(S.fiveK);const nd=ROT[S.q.strength];
    <p><b>Weights go up</b> when you hit the top of the rep range on every set. The app then adds the step shown below for the next session. Miss it, and you keep the weight and aim for one more rep.</p>
    <p><b>Bodyweight moves level up</b> the same way: hit the top of the range on every set and the next session gives you the harder variation.</p></div>
   <div class="panel gym"><h2>Strength rotation</h2><div class="tw"><table class="t"><tr><th>Day</th><th>Gym</th><th>Home</th></tr>
-   ${ROT.map(d=>`<tr class="${d===nd?'cur':''}"><td>${DAYNAME[d]}${d===nd?'<br><span class="small muted">next</span>':''}</td><td>${GYMDAY[d].map(id=>{const e=GYM[id],L=S.lifts[id];return esc(e.n)+(e.k==='t'||e.k==='r'?'':` <span class="muted num">${fw(L?L.w:e.start)} kg</span>`)}).join('<br>')}</td>
-   <td>${HOMEDAY[d].map(id=>esc(HOME[id].lv[S.levels[id]??HOME[id].start][0])).join('<br>')}</td></tr>`).join('')}</table></div>
-   <p class="small muted">Weight steps: +2.5 kg upper-body barbell, +5 kg lower-body barbell, +2 kg dumbbells, +5 kg most machines. Dumbbell weights are per hand.</p></div>
+   ${ROT.map(d=>`<tr class="${d===nd?'cur':''}"><td>${DAYNAME[d]}${d===nd?'<br><span class="small muted">next</span>':''}</td><td>${dayList('gym',d).map(id=>{const e=gx(id),L=S.lifts[id];return esc(e.n)+(e.k==='t'||e.k==='r'?'':` <span class="muted num">${fw(L?L.w:e.start)} kg</span>`)}).join('<br>')}</td>
+   <td>${dayList('home',d).map(id=>{const x=hx(id);return esc(x.lv[homeLv(x,id)][0])}).join('<br>')}</td></tr>`).join('')}</table></div>
+   <p class="small muted">Weight steps: +2.5 kg upper-body barbell, +5 kg lower-body barbell, +2 kg dumbbells, +5 kg most machines. Dumbbell weights are per hand.</p>
+   <div class="row"><button class="btn" data-act="edit" data-v="days-gym">Edit gym days</button><button class="btn" data-act="edit" data-v="days-home">Edit home days</button><button class="btn" data-act="edit" data-v="exlist">My exercises</button></div></div>
   <div class="panel run"><h2>Running · cycle ${S.runCycle}</h2>
    <label class="small muted" for="fivek">Current 5K time</label>
    <div class="row"><input id="fivek" data-f="fiveK" value="${mmss(S.fiveK)}" style="padding:8px;width:100px;font-size:16px" inputmode="numeric"><span class="small muted">Change it and every speed below updates.</span></div>
    <div class="row num small"><span>Easy <b>${f1(p.E)}</b></span><span>Long <b>${f1(p.L)}</b></span><span>Tempo <b>${f1(p.T)}</b></span><span>Interval <b>${f1(p.I)}</b> km/h</span></div>
-   <div class="tw"><table class="t">${RUN.map((r,i)=>`<tr class="${i===S.q.run?'cur':''}"><td class="num">${i+1}</td><td>${esc(r.n)}</td><td class="muted">${r.t}</td></tr>`).join('')}</table></div>
-   <p class="small muted">Session 12 is a 5K time trial. Your new time sets the speeds for the next cycle.</p></div>
+   <div class="tw"><table class="t">${runPlan().map((r,i)=>`<tr class="${i===S.q.run?'cur':''}"><td class="num">${i+1}</td><td>${esc(r.n)}</td><td class="muted">${r.t}</td></tr>`).join('')}</table></div>
+   <p class="small muted">The Test session is a 5K time trial. Your new time sets the speeds for the next cycle.</p>
+   <div class="row"><button class="btn" data-act="edit" data-v="runlist">Edit runs</button></div></div>
   <div class="panel swim"><h2>Swimming · cycle ${S.swimCycle}</h2>
    <p class="small">“Leave every 3:00” means you push off the wall every 3 minutes. Whatever is left after your 50 m is rest. Each cycle the send-offs get 15 seconds faster.</p>
-   <div class="tw"><table class="t">${SWIM.map((w,i)=>`<tr class="${i===S.q.swim?'cur':''}"><td class="num">${i+1}</td><td>${esc(w.n)}</td><td class="muted">${w.t}</td><td class="num">${swimDist(w)} m</td></tr>`).join('')}</table></div>
-   ${S.swim400?`<p class="small">Last 400 m test: <b class="num">${mmss(S.swim400)}</b></p>`:''}</div>
+   <div class="tw"><table class="t">${swimPlan().map((w,i)=>`<tr class="${i===S.q.swim?'cur':''}"><td class="num">${i+1}</td><td>${esc(w.n)}</td><td class="muted">${w.t}</td><td class="num">${swimDist(w)} m</td></tr>`).join('')}</table></div>
+   ${S.swim400?`<p class="small">Last 400 m test: <b class="num">${mmss(S.swim400)}</b></p>`:''}
+   <div class="row"><button class="btn" data-act="edit" data-v="swimlist">Edit swims</button></div></div>
   <div class="panel"><h2>Backup</h2><p class="small muted">Your data lives only in this browser on this device. Download a backup now and then, and use it to move to a new phone.</p>
    <p class="small">Last backup: <b>${lsGet('mp_lastExport')?nice(lsGet('mp_lastExport')):'never'}</b> · ${SESS.length} sessions</p>
    <div class="row"><button class="btn" data-act="export">Export backup</button><label class="btn" for="importFile">Import backup</label>
    <input id="importFile" type="file" accept="application/json,.json" data-f="import" hidden></div></div>
-  <div class="panel"><h2>Start over</h2><p class="small muted">Clears the rotation, weights and levels. Your history stays.</p>
+  <div class="panel"><h2>Start over</h2><p class="small muted">Clears the rotation, weights and levels. Your history and your edits to the plan stay.</p>
    <div>${resetArm?`<button class="btn danger" data-act="reset">Tap again to reset the plan</button>`:`<button class="btn" data-act="resetarm">Reset plan</button>`}</div></div>`}
 
 /* ---------- sheet ---------- */
@@ -540,15 +583,171 @@ function renderSheet(){const el=$('#sheet');if(!sheet){el.innerHTML='';return}
   let h='';
   if(sheet.t==='choose'){const m=sheet.mode;
     if(m==='gym'||m==='home')h=`<h2>Pick a strength day</h2>`+ROT.map(d=>`<button class="opt ${d===ROT[S.q.strength]?'cur':''}" data-act="pick" data-mode="${m}" data-k="${d}"><span><b>${DAYNAME[d]}</b> · ${DAYFOCUS[d]}</span><span class="small muted">${d===ROT[S.q.strength]?'next':''}</span></button>`).join('');
-    else if(m==='run')h=`<h2>Pick a run</h2>`+RUN.map((r,i)=>`<button class="opt ${i===S.q.run?'cur':''}" data-act="pick" data-mode="run" data-k="${i}"><span><b>${esc(r.n)}</b> · ${r.t}</span><span class="small muted num">${estMin('run',i)} min</span></button>`).join('');
-    else h=`<h2>Pick a swim</h2>`+SWIM.map((w,i)=>`<button class="opt ${i===S.q.swim?'cur':''}" data-act="pick" data-mode="swim" data-k="${i}"><span><b>${esc(w.n)}</b> · ${w.t}</span><span class="small muted num">${swimDist(w)} m</span></button>`).join('');
+    else if(m==='run')h=`<h2>Pick a run</h2>`+runPlan().map((r,i)=>`<button class="opt ${i===S.q.run?'cur':''}" data-act="pick" data-mode="run" data-k="${i}"><span><b>${esc(r.n)}</b> · ${r.t}</span><span class="small muted num">${estMin('run',i)} min</span></button>`).join('');
+    else h=`<h2>Pick a swim</h2>`+swimPlan().map((w,i)=>`<button class="opt ${i===S.q.swim?'cur':''}" data-act="pick" data-mode="swim" data-k="${i}"><span><b>${esc(w.n)}</b> · ${w.t}</span><span class="small muted num">${swimDist(w)} m</span></button>`).join('');
     h=`<div class="${m}" style="display:flex;flex-direction:column;gap:8px">${h}</div>`}
-  else if(sheet.t==='swap'){const it=S.active.items[sheet.i];const base=GYM[it.base];const opts=[it.base,...base.alts].filter(id=>id!==it.ex);
-    h=`<h2>Swap ${esc(it.name)}</h2><p class="small muted">Machine taken or something doesn't feel right? Each option keeps its own weight history.</p>`+
-      opts.map(id=>`<button class="opt" data-act="doswap" data-id="${id}"><span><b>${esc(GYM[id].n)}</b></span><span class="small muted num">${fw(S.lifts[id]?.w??GYM[id].start)} kg</span></button>`).join('')}
+  else if(sheet.t==='swap'){const it=S.active.items[sheet.i];const base=gx(it.base);const opts=[it.base,...(base?.alts||[])].filter(id=>id!==it.ex&&gx(id));
+    const rest=gymIds().filter(id=>id!==it.ex&&!opts.includes(id));
+    const opt=id=>{const x=gx(id);return`<button class="opt" data-act="doswap" data-id="${id}"><span><b>${esc(x.n)}</b></span><span class="small muted num">${x.k==='t'||x.k==='r'?'':fw(S.lifts[id]?.w??x.start)+' kg'}</span></button>`};
+    h=`<h2>Swap ${esc(it.name)}</h2><p class="small muted">Machine taken or something doesn't feel right? Each option keeps its own weight history. This only changes today's session.</p>`+
+      (opts.length?`<div class="eyebrow">Suggested</div>`+opts.map(opt).join(''):'')+`<div class="eyebrow">Any exercise</div>`+rest.map(opt).join('')}
   else if(sheet.t==='switch'){h=`<h2>Switch workout?</h2><p>This drops today's ${esc(S.active.title)} without saving. Your plan stays where it was, so it will be offered again next time.</p>
     <button class="btn danger block" data-act="discard">Drop it and pick again</button>`}
   el.innerHTML=`<div class="scrim" data-act="close"><div class="sheet" role="dialog" aria-modal="true">${h}<button class="btn block" data-act="close">Cancel</button></div></div>`}
+
+
+/* ===================== PLAN EDITOR ===================== */
+// ED holds the editor being shown (view==='edit'). Inputs write straight into ED via data-e paths; Save commits to S.plan.
+let ED=null;
+function setP(o,path,v){const k=path.split('.');const last=k.pop();k.reduce((a,x)=>a[x],o)[last]=v}
+const getP=(o,path)=>path.split('.').reduce((a,x)=>a?.[x],o);
+const numOr=(v,d)=>{const n=parseFloat(String(v).replace(',','.'));return isFinite(n)?n:d};
+const intOr=(v,d,min=0)=>Math.max(min,Math.round(numOr(v,d)));
+const fld=(label,path,val,ty='n',cls='')=>`<label class="${cls}">${label}<input data-e="${path}" inputmode="${ty==='s'?'text':ty==='t'?'numeric':'decimal'}" value="${esc(val)}" ${ty==='t'?'placeholder="m:ss"':''}></label>`;
+const sel=(label,path,val,opts,cls='')=>`<label class="${cls}">${label}<select data-e="${path}">${opts.map(([v,t])=>`<option value="${esc(v)}" ${String(v)===String(val)?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`;
+const mvBtns=(path,i,n)=>`<button class="btn sm" data-act="e-mv" data-p="${path}" data-i="${i}" data-d="-1" ${i===0?'disabled':''} aria-label="Move up">↑</button><button class="btn sm" data-act="e-mv" data-p="${path}" data-i="${i}" data-d="1" ${i===n-1?'disabled':''} aria-label="Move down">↓</button><button class="btn sm" data-act="e-rm" data-p="${path}" data-i="${i}" aria-label="Remove">✕</button>`;
+const edHead=(eyebrow,title)=>`<header class="top"><div><div class="eyebrow">${eyebrow}</div><h1>${esc(title)}</h1></div></header>`;
+const edFoot=(resetLabel)=>`<div class="panel"><div class="row"><button class="btn primary" data-act="e-save">Save</button><button class="btn" data-act="e-cancel">Cancel</button></div>${resetLabel?`<button class="link" data-act="e-reset">${resetLabel}</button>`:''}</div>`;
+const exName=(m,id)=>{if(m==='gym')return gx(id)?.n||id;const x=hx(id);return x?x.lv[homeLv(x,id)][0]:id};
+const isCustom=(m,id)=>!!(m==='gym'?P().gymEx:P().homeEx)?.[id];
+
+// Run/swim blocks are edited as friendly strings (metres, m:ss) and converted back on save.
+const runToEd=b=>({l:b.l,k:b.k,z:b.z,note:b.note||'',min:b.min??'',n:b.n??'',m:b.k==='reps'&&b.km?fw(b.km*1000):'',dur:b.k==='reps'&&!b.km&&b.sec?mmss(b.sec):'',rec:b.rec?mmss(b.rec):'',recT:b.recT||'walk',km:b.k==='dist'?b.km:''});
+function runFromEd(e){const b={l:String(e.l||'').trim()||'Run',k:e.k,z:e.z,note:String(e.note||'').trim()};
+  if(e.k==='reps'){b.n=intOr(e.n,4,1);b.km=numOr(e.m,0)/1000||0;b.sec=b.km?0:(parseT(e.dur)||60);b.rec=parseT(e.rec)||0;b.recT=String(e.recT||'walk').trim()}
+  else if(e.k==='dist')b.km=Math.max(.1,numOr(e.km,1));
+  else b.min=Math.max(1,numOr(e.min,10));
+  return b}
+const swimToEd=b=>({l:b.l,n:b.n,d:b.d,txt:b.txt||'',on:b.on?mmss(b.on):'',rest:b.rest||''});
+const swimFromEd=e=>({l:String(e.l||'').trim()||'Swim',n:intOr(e.n,1,1),d:intOr(e.d,50,25),txt:String(e.txt||'').trim(),on:parseT(e.on)||0,rest:intOr(e.rest,0)});
+
+function openEd(t,o={}){
+  if(t==='days-gym'||t==='days-home'){const m=t.slice(5),ids=m==='gym'?gymIds():homeIds();
+    ED={t:'days',mode:m,day:ROT[S.q.strength],draft:{days:Object.fromEntries(ROT.map(d=>[d,dayList(m,d).slice()])),
+      exo:Object.fromEntries(ids.map(id=>{const x=m==='gym'?gx(id):hx(id);return[id,{s:x.s,lo:x.lo,hi:x.hi,rest:x.rest,inc:x.inc??0}]}))}}}
+  else if(t==='ex'){const m=o.mode,src=o.id?(m==='gym'?P().gymEx:P().homeEx)[o.id]:null;
+    const d=m==='gym'?Object.assign({n:'',k:'mc',lo:8,hi:12,s:3,inc:5,start:20,rest:90,cue:''},src&&clone(src))
+      :Object.assign({u:'reps',lo:8,hi:15,s:3,rest:60,cue:''},src&&clone(src),{lvText:src?src.lv.map(l=>l[0]).join('\n'):''});
+    ED={t:'ex',mode:m,id:o.id||null,ret:o.ret||null,draft:d}}
+  else if(t==='exlist')ED={t:'exlist'};
+  else if(t==='runlist')ED={t:'runlist'};
+  else if(t==='swimlist')ED={t:'swimlist'};
+  else if(t==='run'){const r=o.i>=0?runPlan()[o.i]:{t:'Easy',n:'New run',b:[WU1,T_('Run',20,'E','steady'),CD3]};
+    ED={t:'run',i:o.i,draft:{t:r.t,n:r.n,b:r.b.map(runToEd)}}}
+  else if(t==='swim'){const w=o.i>=0?swimPlan()[o.i]:{t:'Endurance',n:'New swim',b:[{l:'Warm-up',n:1,d:100,txt:'easy, any stroke',on:0,rest:0},{l:'Main',n:6,d:50,txt:'freestyle',on:180,rest:0},{l:'Cool-down',n:1,d:50,txt:'easy',on:0,rest:0}]};
+    ED={t:'swim',i:o.i,draft:{t:w.t,n:w.n,b:w.b.map(swimToEd)}}}
+  view='edit';sheet=null;render();window.scrollTo(0,0)}
+
+function renderEditor(){const e=ED;
+  if(e.t==='days'){const m=e.mode,ids=e.draft.days[e.day];
+    const all=(m==='gym'?gymIds():homeIds()).filter(id=>!ids.includes(id));
+    return`<div class="ed">${edHead('Edit plan',(m==='gym'?'Gym':'Home')+' days')}
+    <div class="row seg">${ROT.map(d=>`<button class="btn ${d===e.day?'on':''}" data-act="e-day" data-v="${d}">${DAYNAME[d]}</button>`).join('')}</div>
+    <p class="small muted">${DAYFOCUS[e.day]}. Sets, reps, rest${m==='gym'?' and weight step':''} apply everywhere an exercise is used.</p>
+    ${ids.map((id,i)=>{const x=m==='gym'?gx(id):hx(id),p=`draft.exo.${id}`,o=e.draft.exo[id],timed=m==='gym'?x.k==='t':x.u==='sec',noW=m==='home'||x.k==='t'||x.k==='r';
+      return`<section class="ex ${m}"><div class="ex-top"><div><div class="ex-name">${esc(exName(m,id))}</div>${isCustom(m,id)?'<div class="small muted">Custom exercise</div>':''}</div><div class="row" style="flex-wrap:nowrap">${mvBtns('draft.days.'+e.day,i,ids.length)}</div></div>
+      <div class="logs">${fld('Sets',p+'.s',o.s)}${fld(timed?'Min sec':'Min reps',p+'.lo',o.lo)}${fld(timed?'Max sec':'Max reps',p+'.hi',o.hi)}${fld('Rest (sec)',p+'.rest',o.rest)}${noW?'':fld('Step (kg)',p+'.inc',o.inc)}</div></section>`}).join('')||'<div class="empty">No exercises on this day yet. Add one below.</div>'}
+    <div class="panel"><label class="eyebrow" for="addex">Add an exercise to ${DAYNAME[e.day]}</label>
+     <select id="addex" data-add="1" style="padding:10px;font-size:16px"><option value="">Choose…</option>${all.map(id=>`<option value="${id}">${esc(exName(m,id))}${isCustom(m,id)?' (custom)':''}</option>`).join('')}</select>
+     <div><button class="btn" data-act="e-newex" data-mode="${m}">Create a custom exercise</button></div></div>
+    ${edFoot(`Restore default ${m} days`)}</div>`}
+  if(e.t==='ex'){const m=e.mode,d=e.draft;
+    const f=m==='gym'?`${fld('Name','draft.n',d.n,'s','full')}
+      ${sel('Type','draft.k',d.k,[['bb','Barbell'],['db','Dumbbell (kg per hand)'],['mc','Machine or cable'],['t','Timed hold'],['r','Reps only (bodyweight)']],'full')}
+      ${fld('Sets','draft.s',d.s)}${fld(d.k==='t'?'Min sec':'Min reps','draft.lo',d.lo)}${fld(d.k==='t'?'Max sec':'Max reps','draft.hi',d.hi)}${fld('Rest (sec)','draft.rest',d.rest)}
+      ${d.k==='t'||d.k==='r'?'':fld('Step (kg)','draft.inc',d.inc)+fld('Start (kg)','draft.start',d.start)}`
+     :`<label class="full">Variations, one per line, easiest first<textarea data-e="draft.lvText" rows="4" placeholder="Wall push-up&#10;Incline push-up&#10;Push-up">${esc(d.lvText)}</textarea></label>
+      ${sel('Counts','draft.u',d.u,[['reps','Reps'],['sec','Seconds']],'full')}
+      ${fld('Sets','draft.s',d.s)}${fld(d.u==='sec'?'Min sec':'Min reps','draft.lo',d.lo)}${fld(d.u==='sec'?'Max sec':'Max reps','draft.hi',d.hi)}${fld('Rest (sec)','draft.rest',d.rest)}`;
+    return`<div class="ed">${edHead(m==='gym'?'Gym exercise':'Home exercise',e.id?'Edit exercise':'New exercise')}
+    <section class="ex ${m}"><div class="logs">${f}${fld('Notes / form cue','draft.cue',d.cue,'s','full')}</div>
+    ${m==='home'?'<p class="small muted">Hit the top of the range on every set and you move to the next variation.</p>':''}</section>
+    ${e.id?`<div><button class="btn danger" data-act="e-delex">Delete this exercise</button></div>`:''}${edFoot('')}</div>`}
+  if(e.t==='exlist'){const list=m=>Object.entries((m==='gym'?P().gymEx:P().homeEx)||{});
+    const sec=(m,title)=>`<div class="panel ${m}"><h2>${title}</h2>${list(m).map(([id,x])=>`<div class="edrow"><span><b>${esc(m==='gym'?x.n:x.lv[0][0])}</b><br><span class="small muted">${x.s} × ${x.lo}–${x.hi}${(m==='gym'?x.k==='t':x.u==='sec')?' s':''}${m==='home'?` · ${x.lv.length} level${x.lv.length>1?'s':''}`:''}</span></span><button class="btn sm" data-act="e-editex" data-mode="${m}" data-id="${id}">Edit</button></div>`).join('')||'<p class="small muted">None yet.</p>'}
+      <div><button class="btn" data-act="e-newex" data-mode="${m}">New ${m} exercise</button></div></div>`;
+    return`<div class="ed">${edHead('Edit plan','My exercises')}<p class="small muted">Create exercises, then add them to a day with Edit gym days or Edit home days.</p>
+    ${sec('gym','Gym')}${sec('home','Home')}<div><button class="btn" data-act="e-cancel">Back to plan</button></div></div>`}
+  if(e.t==='runlist'||e.t==='swimlist'){const run=e.t==='runlist',L=run?runPlan():swimPlan(),q=run?S.q.run:S.q.swim,c=run?'run':'swim',pp=paces(S.fiveK);
+    return`<div class="ed">${edHead('Edit plan',run?'Runs':'Swims')}
+    <p class="small muted">Sessions are done in this order, then the cycle repeats. ${run?'Finishing a Test session saves your 5K time, updates your speeds and starts a new cycle.':'Finishing a Test session starts a new cycle with send-offs 15 s faster.'} Changes save straight away.</p>
+    <div class="hist">${L.map((r,i)=>`<div class="edrow ${c} ${i===q?'cur':''}"><span><b>${i+1}. ${esc(r.n)}</b><br><span class="small muted">${esc(r.t)} · ${run?`about ${Math.round(runMin(r,pp))} min`:swimDist(r)+' m'}${i===q?' · next':''}</span></span>
+      <span class="row" style="flex-wrap:nowrap"><button class="btn sm" data-act="e-open" data-v="${c}" data-i="${i}">Edit</button>${mvBtns('list',i,L.length)}</span></div>`).join('')}</div>
+    <div class="row"><button class="btn" data-act="e-open" data-v="${c}" data-i="-1">Add a ${c}</button><button class="btn" data-act="e-cancel">Done</button></div>
+    ${P()[c]?`<button class="link" data-act="e-reset">Restore the default ${c} plan</button>`:''}</div>`}
+  if(e.t==='run'){const d=e.draft;
+    return`<div class="ed">${edHead('Run',e.i>=0?'Edit run':'New run')}
+    <section class="ex run"><div class="logs">${fld('Name','draft.n',d.n,'s','full')}${sel('Type','draft.t',d.t,RUN_TYPES.map(x=>[x,x]),'full')}</div>
+    ${d.t==='Test'?'<p class="small muted">Test sessions ask for your 5K time, which updates your speeds and starts a new cycle.</p>':''}</section>
+    ${d.b.map((b,i)=>{const p='draft.b.'+i;return`<section class="ex run"><div class="ex-top"><div class="eyebrow">Block ${i+1}</div><div class="row" style="flex-wrap:nowrap">${mvBtns('draft.b',i,d.b.length)}</div></div>
+      <div class="logs">${fld('Label',p+'.l',b.l,'s')}${sel('Kind',p+'.k',b.k,[['time','Time'],['reps','Repeats'],['dist','Distance']])}${sel('Speed',p+'.z',b.z,Object.entries(ZONE))}
+      ${b.k==='time'?fld('Minutes',p+'.min',b.min):b.k==='dist'?fld('Distance (km)',p+'.km',b.km)
+        :fld('Repeats',p+'.n',b.n)+fld('Each (m)',p+'.m',b.m)+fld('or each (m:ss)',p+'.dur',b.dur,'t')+fld('Recovery (m:ss)',p+'.rec',b.rec,'t')+fld('Recovery is',p+'.recT',b.recT,'s','full')}
+      ${fld('Note','draft.b.'+i+'.note',b.note,'s','full')}</div></section>`}).join('')}
+    <div><button class="btn" data-act="e-addblock">Add a block</button></div>${edFoot('')}</div>`}
+  if(e.t==='swim'){const d=e.draft;
+    return`<div class="ed">${edHead('Swim',e.i>=0?'Edit swim':'New swim')}
+    <section class="ex swim"><div class="logs">${fld('Name','draft.n',d.n,'s','full')}${sel('Type','draft.t',d.t,SWIM_TYPES.map(x=>[x,x]),'full')}</div>
+    <p class="small muted">"Leave every" is the send-off time (it gets 15 s faster each cycle). Leave it empty to use a fixed rest instead.${d.t==='Test'?' Test sessions ask for your 400 m time.':''}</p></section>
+    ${d.b.map((b,i)=>{const p='draft.b.'+i;return`<section class="ex swim"><div class="ex-top"><div class="eyebrow">Block ${i+1}</div><div class="row" style="flex-wrap:nowrap">${mvBtns('draft.b',i,d.b.length)}</div></div>
+      <div class="logs">${fld('Label',p+'.l',b.l,'s')}${fld('Repeats',p+'.n',b.n)}${fld('Distance (m)',p+'.d',b.d)}
+      ${fld('What to swim',p+'.txt',b.txt,'s','full')}${fld('Leave every',p+'.on',b.on,'t')}${fld('or rest (sec)',p+'.rest',b.rest)}</div></section>`}).join('')}
+    <div><button class="btn" data-act="e-addblock">Add a block</button></div>${edFoot('')}</div>`}
+  return''}
+
+function edAddEx(id){ED.draft.days[ED.day].push(id);render()}
+function edBack(){if(ED?.ret){ED=ED.ret;render()}else if(ED&&(ED.t==='run'||ED.t==='swim'))openEd(ED.t+'list');else{ED=null;view='plan';render()}window.scrollTo(0,0)}
+function commitList(c,L,q){P()[c]=L;S.q[c]=q;clampQ();save()}
+
+function edSave(){const e=ED;
+  if(e.t==='days'){const m=e.mode,base=m==='gym'?GYM:HOME,cust=(m==='gym'?P().gymEx:P().homeEx)||{},exo={};
+    for(const[id,o]of Object.entries(e.draft.exo)){const def=cust[id]||base[id];if(!def)continue;
+      let lo=intOr(o.lo,def.lo,1),hi=intOr(o.hi,def.hi,1);if(hi<lo)[lo,hi]=[hi,lo];
+      const v={s:intOr(o.s,def.s,1),lo,hi,rest:intOr(o.rest,def.rest),inc:Math.max(0,numOr(o.inc,def.inc??0))};
+      const diff={};for(const k in v)if(v[k]!==(def[k]??0))diff[k]=v[k];
+      if(Object.keys(diff).length)exo[id]=diff}
+    P().exo=Object.assign({},P().exo,{[m]:exo});P()[m+'Day']=clone(e.draft.days);save();ED=null;view='plan';render();toast(`${m==='gym'?'Gym':'Home'} days saved.`);return}
+  if(e.t==='ex'){const m=e.mode,d=e.draft;let x;
+    let lo=intOr(d.lo,8,1),hi=intOr(d.hi,12,1);if(hi<lo)[lo,hi]=[hi,lo];
+    if(m==='gym'){const n=String(d.n||'').trim();if(!n){toast('Give the exercise a name.');return}
+      const w=d.k!=='t'&&d.k!=='r';x={n,k:d.k,lo,hi,s:intOr(d.s,3,1),rest:intOr(d.rest,90),inc:w?Math.max(0,numOr(d.inc,2.5)):0,start:w?Math.max(0,numOr(d.start,20)):0,cue:String(d.cue||'').trim(),alts:[]}}
+    else{const lv=String(d.lvText||'').split('\n').map(s=>s.trim()).filter(Boolean);if(!lv.length){toast('Add at least one variation.');return}
+      const cue=String(d.cue||'').trim();x={u:d.u,lo,hi,s:intOr(d.s,3,1),rest:intOr(d.rest,60),start:0,cue,lv:lv.map(n=>[n,cue])}}
+    const key=m==='gym'?'gymEx':'homeEx',id=e.id||'c_'+uid();P()[key]=Object.assign({},P()[key],{[id]:x});
+    if(P().exo?.[m])delete P().exo[m][id];save();
+    if(e.ret){const r=e.ret;if(!e.id)r.draft.days[r.day].push(id);r.draft.exo[id]={s:x.s,lo:x.lo,hi:x.hi,rest:x.rest,inc:x.inc??0}}
+    toast(e.id?'Exercise updated.':'Exercise created.');if(e.ret)edBack();else openEd('exlist');return}
+  if(e.t==='run'||e.t==='swim'){const d=e.draft,run=e.t==='run';if(!d.b.length){toast('Add at least one block.');return}
+    const r={t:d.t,n:String(d.n||'').trim()||(run?'Run':'Swim'),b:d.b.map(run?runFromEd:swimFromEd)};
+    const L=clone(run?runPlan():swimPlan());if(e.i>=0)L[e.i]=r;else L.push(r);
+    commitList(e.t,L,S.q[e.t]);toast(run?'Run saved.':'Swim saved.');openEd(e.t+'list')}}
+
+function edClick(a,b){const e=ED,i=+b.dataset.i;
+  switch(a){
+   case'edit':openEd(b.dataset.v);return;
+   case'e-cancel':edBack();return;
+   case'e-save':edSave();return;
+   case'e-day':e.day=b.dataset.v;render();return;
+   case'e-open':openEd(b.dataset.v,{i});return;
+   case'e-newex':openEd('ex',{mode:b.dataset.mode,ret:e.t==='days'?e:null});return;
+   case'e-editex':openEd('ex',{mode:b.dataset.mode,id:b.dataset.id});return;
+   case'e-addblock':e.draft.b.push(e.t==='run'?runToEd(T_('Run',10,'E','')):swimToEd({l:'Main',n:4,d:50,txt:'freestyle',on:180,rest:0}));render();return;
+   case'e-mv':case'e-rm':{const path=b.dataset.p;
+     if(path==='list'){const c=e.t==='runlist'?'run':'swim',L=clone(c==='run'?runPlan():swimPlan());let q=S.q[c];
+       if(a==='e-rm'){if(L.length<2){toast('Keep at least one session.');return}if(!confirm(`Remove "${L[i].n}" from the plan?`))return;L.splice(i,1);if(i<q)q--}
+       else{const j=i+ +b.dataset.d;[L[i],L[j]]=[L[j],L[i]];if(q===i)q=j;else if(q===j)q=i}
+       commitList(c,L,q);render();return}
+     const L=getP(e,path);if(a==='e-rm')L.splice(i,1);else{const j=i+ +b.dataset.d;[L[i],L[j]]=[L[j],L[i]]}render();return}
+   case'e-reset':{
+     if(e.t==='days'){if(!confirm(`Restore the default ${e.mode} days and exercise settings? Custom exercises stay in My exercises.`))return;
+       delete P()[e.mode+'Day'];if(P().exo)delete P().exo[e.mode];save();ED=null;view='plan';render();toast('Default days restored.');return}
+     const c=e.t==='runlist'?'run':'swim';if(!confirm(`Restore the default ${c} plan? Your edited ${c} sessions will be replaced.`))return;
+     delete P()[c];S.q[c]=0;save();render();toast(`Default ${c} plan restored.`);return}
+   case'e-delex':{const m=e.mode,id=e.id,key=m==='gym'?'gymEx':'homeEx';if(!confirm('Delete this exercise? It is removed from every day it is on. Past sessions keep it.'))return;
+     delete P()[key][id];const dk=m+'Day';if(P()[dk])for(const d of ROT)P()[dk][d]=P()[dk][d].filter(x=>x!==id);
+     if(P().exo?.[m])delete P().exo[m][id];save();toast('Exercise deleted.');
+     if(e.ret){const r=e.ret;for(const d of ROT)r.draft.days[d]=r.draft.days[d].filter(x=>x!==id);delete r.draft.exo[id];edBack()}else openEd('exlist');return}
+  }}
 
 /* ---------- timer ---------- */
 let tEnd=0,tDur=0,tInt=null,beeped=false,actx=null,wake=null;
@@ -574,7 +773,7 @@ document.addEventListener('click',ev=>{
   if(a==='close'&&ev.target!==b&&b.classList.contains('scrim'))return; // clicks inside sheet
   const s=S.active,i=+b.dataset.i,j=+b.dataset.j;
   switch(a){
-   case'tab':view=b.dataset.v;delArm=null;resetArm=false;sheet=null;render();window.scrollTo(0,0);return;
+   case'tab':view=b.dataset.v;ED=null;delArm=null;resetArm=false;sheet=null;render();window.scrollTo(0,0);return;
    case'start':{const m=b.dataset.mode;S.active=m==='gym'||m==='home'?buildStrength(m,ROT[S.q.strength]):m==='run'?buildRun(S.q.run):buildSwim(S.q.swim);break}
    case'choose':sheet={t:'choose',mode:b.dataset.mode};renderSheet();return;
    case'pick':{const m=b.dataset.mode,k=b.dataset.k;S.active=m==='gym'||m==='home'?buildStrength(m,k):m==='run'?buildRun(+k):buildSwim(+k);sheet=null;break}
@@ -585,13 +784,13 @@ document.addEventListener('click',ev=>{
    case'swap':sheet={t:'swap',i};renderSheet();return;
    case'doswap':{const old=s.items[sheet.i];const n=gymItem(b.dataset.id,old.base);n.sets=n.sets.slice(0,Math.max(1,old.sets.length));
      while(n.sets.length<old.sets.length)n.sets.push({...n.sets[n.sets.length-1],done:false});s.items[sheet.i]=n;sheet=null;break}
-   case'w':{const it=s.items[i],e=GYM[it.ex];const step=it.k==='bb'?2.5:it.k==='db'?(e.inc||2):(e.inc||5);
+   case'w':{const it=s.items[i],e=gx(it.ex)||{};const step=it.k==='bb'?2.5:it.k==='db'?(e.inc||2):(e.inc||5);
      const nv=Math.max(0,(+it.sets[j].w||0)+step*+b.dataset.d);for(let k=j;k<it.sets.length;k++)if(k===j||!it.sets[k].done)it.sets[k].w=nv;break}
    case'r':{const x=s.items[i].sets[j];const st=s.items[i].u==='sec'?5:1;x.r=Math.max(0,(+x.r||0)+st*+b.dataset.d);break}
    case'tick':{const it=s.items[i],x=it.sets[j];x.done=!x.done;if(x.done){if(j+1<it.sets.length&&!it.sets[j+1].done){it.sets[j+1].w=x.w}startTimer(it.rest);keepAwake()}break}
    case'addset':{const it=s.items[i];const l=it.sets[it.sets.length-1];it.sets.push({...l,done:false});break}
    case'delset':s.items[i].sets.pop();break;
-   case'lvl':{const it=s.items[i];it.level=Math.max(0,Math.min(HOME[it.ex].lv.length-1,it.level+ +b.dataset.d));it.up=false;it.sets.forEach(x=>{if(!x.done)x.r=it.lo});break}
+   case'lvl':{const it=s.items[i];it.level=Math.max(0,Math.min((hx(it.ex)?.lv.length||1)-1,it.level+ +b.dataset.d));it.up=false;it.sets.forEach(x=>{if(!x.done)x.r=it.lo});break}
    case'chk':s.checks[+b.dataset.k]=!s.checks[+b.dataset.k];break;
    case'finish':finish();return;
    case't30':tEnd+=30000;tDur+=30;beeped=false;renderTimer();return;
@@ -601,17 +800,19 @@ document.addEventListener('click',ev=>{
    case'delcancel':delArm=null;render();return;
    case'del':removeSession(b.dataset.id);delArm=null;render();return;
    case'resetarm':resetArm=true;render();return;
-   case'reset':{const keep={fiveK:S.fiveK};S=Object.assign(defState(),keep);resetArm=false;save();render();toast('Plan reset. History kept.');return}
-   default:return}
+   case'reset':{const keep={fiveK:S.fiveK,plan:S.plan};S=Object.assign(defState(),keep);resetArm=false;save();render();toast('Plan reset. History kept.');return}
+   default:if(a==='edit'||a.startsWith('e-')){edClick(a,b);return}return}
   save();render();
   if(a==='start'||a==='pick'){window.scrollTo(0,0);keepAwake()}
 });
-document.addEventListener('input',ev=>{const t=ev.target,f=t.dataset.f;if(!f)return;const s=S.active;
+document.addEventListener('input',ev=>{const t=ev.target;if(t.dataset.e&&ED&&t.tagName!=='SELECT'){setP(ED,t.dataset.e,t.value);return}
+  const f=t.dataset.f;if(!f)return;const s=S.active;
   if(f==='w'||f==='r'){const x=s.items[+t.dataset.i].sets[+t.dataset.j];x[f]=t.value===''?'':(+t.value.replace(',','.'));save();return}
   if(f==='notes'){s.notes=t.value;save();return}
   if(f.startsWith('log.')){s.log[f.slice(4)]=t.value;save();return}
 });
 document.addEventListener('change',ev=>{const t=ev.target,f=t.dataset.f;
+  if(t.tagName==='SELECT'&&ED){if(t.dataset.e){setP(ED,t.dataset.e,t.value);render()}else if(t.dataset.add&&t.value){edAddEx(t.value)}}
   if(f==='histEx'){histEx=t.value;render()}
   if(f==='import'&&t.files&&t.files[0]){importData(t.files[0]);t.value=''}
   if(f==='fiveK'){const v=parseT(t.value);if(v&&v>600&&v<7200){S.fiveK=v;save();render();toast('Run speeds updated.')}else{t.value=mmss(S.fiveK);toast('Enter your 5K time as mm:ss, for example 29:30.')}}
