@@ -62,6 +62,8 @@ header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:1
 .sync.on i{background:var(--ok)}
 
 .note{background:var(--warn-bg);color:var(--warn-ink);border-radius:var(--r);padding:10px 12px;font-size:14px}
+.panel ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.panel h3{margin-top:4px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
 
 /* mode picker */
@@ -583,11 +585,24 @@ let resetArm=false;
 function renderPlan(){const p=paces(S.fiveK);
   return`<header class="top"><div><div class="eyebrow">Goal: get stronger</div><h1>Your plan</h1></div>${syncTag()}</header>
   <div class="panel"><h2>How it works</h2>
-   <p><b>Gym and Home:</b> pick any routine each time you train. The presets come from well-tested templates (full body, upper/lower and, for the gym, push/pull/legs). Each one trains every muscle about twice a week. Pick one template and stick with it for a few months.</p>
-   <p><b>Run and Swim:</b> pick any session. The app suggests the next one in your plan so you work through the cycle, and a Test session measures your progress.</p>
-   <p>A good week for your goal: three strength sessions and one cardio session.</p>
-   <p><b>Weights go up</b> when you hit the top of the rep range on every set. The app then adds the step shown below for the next session. Miss it, and you keep the weight and aim for one more rep.</p>
-   <p><b>Bodyweight moves level up</b> the same way: hit the top of the range on every set and the next session gives you the harder variation.</p></div>
+   <p><b>1. Pick a workout.</b> On Today, tap Gym, Home, Run or Swim and choose a session. There's no schedule: train when it suits you. A good week for getting stronger is three strength sessions and one cardio session.</p>
+   <p><b>2. Log as you go.</b> Sets start with last time's numbers. Adjust the weight or reps, then tap ✓. A rest timer starts on its own. Skip anything you don't want to do: only ticked sets are saved. Tap Swap if a machine is taken.</p>
+   <p><b>3. Tap Finish.</b> Nothing is saved or changes in your plan until you do. Switch workout drops the session without saving.</p>
+   <h3>Progress is automatic</h3>
+   <p>Hit the top of the rep range on every set, and next time the app makes it harder:</p>
+   <ul class="small">
+    <li><b>Weights</b> go up by the exercise's step (shown below).</li>
+    <li><b>Assisted machines</b> give you less help. Lower is harder.</li>
+    <li><b>Bodyweight moves</b> level up to a harder variation.</li>
+   </ul>
+   <p>Miss the top of the range, and you keep the same weight or level and aim for one more rep.</p>
+   <h3>Make it yours</h3>
+   <ul class="small">
+    <li><b>Gym and Home routines:</b> the presets use well-tested templates (full body, upper/lower and, for the gym, push/pull/legs) that train each muscle about twice a week. Pick one template and stick with it for a few months, or build your own with Manage routines.</li>
+    <li><b>My exercises:</b> add your own gym exercises (barbell, dumbbell, machine, assisted, timed or bodyweight) or home exercises (a ladder of harder variations).</li>
+    <li><b>Runs and swims:</b> pick any session. The app suggests the next one so you work through the cycle. Test sessions measure your progress: a new 5K time updates your treadmill speeds, and each swim cycle makes send-offs 15 s faster.</li>
+   </ul>
+   <p class="small muted">Your data is saved only on this device. Export a backup now and then (see Backup below).</p></div>
   <div class="panel gym"><h2>Gym routines</h2>
    ${routines().map(r=>`<div><b>${esc(r.n)}</b><div class="small muted">${routineEx(r).map(id=>{const e=gx(id),L=S.lifts[id];return esc(e.n)+(e.k==='t'||e.k==='r'?'':' '+kgTxt(L?L.w:e.start,e.k))}).join(' · ')||'No exercises'}</div></div>`).join('')||'<p class="muted">No routines yet.</p>'}
    <p class="small muted">Weight steps: +2.5 kg upper-body barbell, +5 kg lower-body barbell, +2 kg dumbbells, +5 kg most machines. Dumbbell weights are per hand.</p>
