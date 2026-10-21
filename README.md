@@ -1,5 +1,7 @@
 # Morning Pick
 
+**Live app:** https://mangoomeh.github.io/morning-pick/
+
 A phone-first workout planner and tracker. Each morning you choose **Gym**, **Home**, **Run** or **Swim**, and the app gives you the next session in that plan and makes logging quick.
 
 - A 4-day upper/lower strength rotation that Gym and Home share, with automatic weight and level progression
@@ -7,6 +9,7 @@ A phone-first workout planner and tracker. Each morning you choose **Gym**, **Ho
 - A 12-session treadmill plan with speeds worked out from your 5K time
 - A 10-session 50 m pool plan whose send-off times get faster each cycle
 - History, a strength chart (estimated 1RM) and 5K test times
+- Editable plan: change strength days, create custom exercises, and edit run and swim sessions (Plan tab)
 - Installable (PWA), works offline, Export/Import backup
 
 ## Stack
@@ -33,8 +36,8 @@ python3 -m http.server 8000
 ## Deploy (GitHub Pages)
 
 1. In the repo on GitHub, open **Settings → Pages** and set **Source** to **GitHub Actions**.
-2. Push to `main`. The workflow publishes the site to `https://<user>.github.io/<repo>/`.
-3. On your phone, open that URL and install it:
+2. Push to `main`. The workflow publishes the site to https://mangoomeh.github.io/morning-pick/.
+3. On your phone, open that address and install it:
    - **iPhone (Safari):** Share → Add to Home Screen.
    - **Android (Chrome):** menu → Install app.
 
